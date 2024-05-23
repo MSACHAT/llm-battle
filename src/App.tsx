@@ -4,6 +4,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { RouterProvider } from "react-router";
 import { Battle } from "@/battle";
 import { LeaderBoard } from "@/leaderBoard";
+import { Chat } from "@/chat";
 
 function App() {
   const body = document.body;
@@ -16,6 +17,10 @@ function App() {
     {
       path: "/leaderBoard",
       element: <LeaderBoard />,
+    },
+    {
+      path: "/chat",
+      element: <Chat />,
     },
   ]);
   return <RouterProvider router={router} />;

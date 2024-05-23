@@ -1,11 +1,11 @@
 import { Button } from "@douyinfe/semi-ui";
 import { NavigationBar } from "@/component/base";
 
-export const LeaderBoard = () => {
+export const Chat = () => {
   return (
     <div>
       <NavigationBar />
-      <Button>LeaderBoard</Button>
+      <Button>chat</Button>
     </div>
   );
 };

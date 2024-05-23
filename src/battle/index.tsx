@@ -1,5 +1,11 @@
 import { Button } from "@douyinfe/semi-ui";
+import { NavigationBar } from "@/component/base";
 
 export const Battle = () => {
-  return <Button>aaa</Button>;
+  return (
+    <div>
+      <NavigationBar />
+      <Button>对战</Button>
+    </div>
+  );
 };
