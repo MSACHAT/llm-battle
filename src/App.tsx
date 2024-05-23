@@ -1,28 +1,29 @@
 import React from "react";
 import "./App.css";
-import { createBrowserRouter } from "react-router-dom";
-import { RouterProvider } from "react-router";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 import { Battle } from "@/battle";
 import { LeaderBoard } from "@/leaderBoard";
 import { Chat } from "@/chat";
+import { NavigationBar } from "@/component/base";
 
 function App() {
   const body = document.body;
   body.setAttribute("theme-mode", "dark");
-  const router = createBrowserRouter([
-    {
-      path: "/battle",
-      element: <Battle />,
-    },
-    {
-      path: "/leaderBoard",
-      element: <LeaderBoard />,
-    },
-    {
-      path: "/chat",
-      element: <Chat />,
-    },
-  ]);
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<NavigationBar />}>
+        <Route path="battle" element={<Battle />} />
+        <Route path="leaderBoard" element={<LeaderBoard />} />
+        <Route path="chat" element={<Chat />} />
+      </Route>,
+    ),
+  );
   return <RouterProvider router={router} />;
 }
 
