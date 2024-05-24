@@ -2,6 +2,9 @@
   "name": "llm-battle",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "18.18.0"
+  },
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@douyinfe/semi-ui": "^2.58.1",
