@@ -10,6 +10,7 @@ import { Battle } from "@/battle";
 import { LeaderBoard } from "@/leaderBoard";
 import { Chat } from "@/chat";
 import { NavigationBar } from "@/component/base";
+import { TyperEffect } from "@/stories/TyperEffect";
 
 function App() {
   const body = document.body;
@@ -21,6 +22,7 @@ function App() {
         <Route path="battle" element={<Battle />} />
         <Route path="leaderBoard" element={<LeaderBoard />} />
         <Route path="chat" element={<Chat />} />
+        <Route path="typer" element={<TyperEffect />} />
       </Route>,
     ),
   );

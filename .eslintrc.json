@@ -1,5 +1,10 @@
 {
-  "extends": ["prettier", "plugin:prettier/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:storybook/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "parserOptions": {
     "ecmaVersion": 8,
     "sourceType": "module",
@@ -13,12 +18,14 @@
       ]
     }
   },
-    "parser": "@babel/eslint-parser",
-    "env": {
+  "parser": "@typescript-eslint/parser",
+  "env": {
     "es6": true,
     "node": true
   },
-  "plugins": ["react"],
+  "plugins": [
+    "react"
+  ],
   "rules": {
     "react/prop-types": "off"
   }

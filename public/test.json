@@ -1,0 +1,16 @@
+{
+  "message_list":[
+    {
+      "role": "user",
+      "content": "aaaaaa",
+      "message_id": "13712837123",
+      "message_index": "1"
+    },
+    {
+      "role": "bot",
+      "content": "aaaaaa2",
+      "message_id": "137128371923",
+      "message_index": "2"
+    }
+  ]
+}

@@ -2,6 +2,9 @@ import { Avatar, Dropdown, Nav, Space } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
+
+type NavItemKey = "battle" | "leaderBoard" | "chat";
+
 export const NavigationBar = () => {
   return (
     <div>
@@ -11,18 +14,15 @@ export const NavigationBar = () => {
           text: "AI模型大PK",
         }}
         mode={"horizontal"}
-        renderWrapper={({ itemElement, isSubNav, isInSubNav, props }) => {
-          const routerMap = {
+        renderWrapper={({ itemElement, props }) => {
+          const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
             chat: "/chat",
           };
+          const itemKey = props.itemKey as NavItemKey;
           return (
-            <Link
-              style={{ textDecoration: "none" }}
-              // @ts-ignore
-              to={routerMap[props.itemKey]}
-            >
+            <Link style={{ textDecoration: "none" }} to={routerMap[itemKey]}>
               {itemElement}
             </Link>
           );
