@@ -11,6 +11,7 @@ import { LeaderBoard } from "@/leaderBoard";
 import { Chat } from "@/chat";
 import { NavigationBar } from "@/component/base";
 import { TyperEffect } from "@/stories/TyperEffect";
+import VoteComponent from "@/component/voteComponent";
 
 function App() {
   const body = document.body;
@@ -22,7 +23,7 @@ function App() {
         <Route path="battle" element={<Battle />} />
         <Route path="leaderBoard" element={<LeaderBoard />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="typer" element={<TyperEffect />} />
+        <Route path={"vote"} element={<VoteComponent />} />
       </Route>,
     ),
   );

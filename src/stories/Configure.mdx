@@ -1,4 +1,4 @@
-import {Meta} from "@storybook/blocks";
+import { Meta } from "@storybook/blocks";
 
 import Github from "./assets/github.svg";
 import Discord from "./assets/discord.svg";
@@ -15,23 +15,25 @@ import Accessibility from "./assets/accessibility.png";
 import Theming from "./assets/theming.png";
 import AddonLibrary from "./assets/addon-library.png";
 
-export const RightArrow = () => <svg
+export const RightArrow = () => (
+  <svg
     viewBox="0 0 14 14"
     width="8px"
     height="14px"
     style={{
-        marginLeft: '4px',
-        display: 'inline-block',
-        shapeRendering: 'inherit',
-        verticalAlign: 'middle',
-        fill: 'currentColor',
-        'path fill': 'currentColor'
+      marginLeft: "4px",
+      display: "inline-block",
+      shapeRendering: "inherit",
+      verticalAlign: "middle",
+      fill: "currentColor",
+      "path fill": "currentColor",
     }}
->
-    <path d="m11.1 7.35-5.5 5.5a.5.5 0 0 1-.7-.7L10.04 7 4.9 1.85a.5.5 0 1 1 .7-.7l5.5 5.5c.2.2.2.5 0 .7Z"/>
-</svg>
+  >
+    <path d="m11.1 7.35-5.5 5.5a.5.5 0 0 1-.7-.7L10.04 7 4.9 1.85a.5.5 0 1 1 .7-.7l5.5 5.5c.2.2.2.5 0 .7Z" />
+  </svg>
+);
 
-<Meta title="Configure your project"/>
+<Meta title="Configure your project" />
 
 <div className="sb-container">
     <div className='sb-section-title'>
@@ -83,6 +85,7 @@ export const RightArrow = () => <svg
             </div>
         </div>
     </div>
+
 </div>
 <div className="sb-container">
     <div className='sb-section-title'>
@@ -158,6 +161,7 @@ export const RightArrow = () => <svg
             </div>
         </div>
     </div>
+
 </div>
 <div className='sb-addon'>
     <div className='sb-addon-text'>
@@ -214,10 +218,11 @@ export const RightArrow = () => <svg
             target="_blank"
         >Discover tutorials<RightArrow/></a>
     </div>
+
 </div>
 
 <style>
-    {`
+  {`
   .sb-container {
     margin-bottom: 48px;
   }

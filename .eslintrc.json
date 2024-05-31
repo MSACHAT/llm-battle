@@ -13,9 +13,7 @@
     },
     "requireConfigFile": false,
     "babelOptions": {
-      "presets": [
-        "@babel/preset-react"
-      ]
+      "presets": ["@babel/preset-react"]
     }
   },
   "parser": "@typescript-eslint/parser",
@@ -23,9 +21,7 @@
     "es6": true,
     "node": true
   },
-  "plugins": [
-    "react"
-  ],
+  "plugins": ["react"],
   "rules": {
     "react/prop-types": "off"
   }
