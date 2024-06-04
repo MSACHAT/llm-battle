@@ -1,0 +1,8 @@
+.loginButton {
+    width: 250px;
+    height: var(--height-button_default, 48px);
+    padding: var(--spacing-button_default-paddingTop, 6px) var(--spacing-button_default-paddingRight, 12px) var(--spacing-button_default-paddingTop, 6px) var(--spacing-button_default-paddingLeft, 12px);
+    // border-radius: var(----semi-border-radius-full, 9999px);
+    border: 0px solid var(--color-button_primary-border-default, rgba(0, 0, 0, 0.00));
+    background: var(--usage-data---semi-color-data-2, #F58700);
+}
