@@ -8,7 +8,6 @@ import axios from "axios";
 type ChatMessage = {
   content: string;
   type: "reply" | "query";
-  id: number;
 };
 
 const BotReply = ({ reply }: { reply: string }) => {
@@ -38,24 +37,24 @@ const UserQuery = ({ query }: { query: string }) => {
 
 export const Chat = () => {
   const fakeData: ChatMessage[] = [
-    { content: "test1", type: "query", id: 1 },
-    { content: "test1", type: "reply", id: 2 },
-    { content: "test1", type: "query", id: 3 },
-    { content: "test1", type: "reply", id: 4 },
-    { content: "test1", type: "query", id: 5 },
-    { content: "test1", type: "reply", id: 6 },
-    { content: "test1", type: "query", id: 7 },
-    { content: "test1", type: "reply", id: 8 },
-    { content: "test1", type: "query", id: 9 },
-    { content: "test1", type: "reply", id: 10 },
-    { content: "test1", type: "query", id: 11 },
-    { content: "test1", type: "reply", id: 12 },
-    { content: "test1", type: "query", id: 13 },
-    { content: "test1", type: "reply", id: 14 },
-    { content: "test1", type: "query", id: 15 },
-    { content: "test1", type: "reply", id: 16 },
-    { content: "test1", type: "query", id: 17 },
-    { content: "test2", type: "reply", id: 18 },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test2", type: "reply" },
   ];
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
@@ -67,7 +66,6 @@ export const Chat = () => {
   const MAX_DATA = 30;
   const hasMore = chatHistory.length < MAX_DATA;
   const canAutoScrollRef = useRef(true);
-  const chatHistoryLength = useRef(chatHistory.length);
 
   function fetchData() {
     canAutoScrollRef.current = false;
@@ -75,9 +73,9 @@ export const Chat = () => {
     axios.get("https://mock/1").then((res) => {
       console.log(res);
       newData = [...res.data, ...newData];
-      setTimeout(() => setChatHistory([...res.data, ...chatHistory]), 1500);
     });
     // fake delay to simulate a time-consuming network request
+    setTimeout(() => setChatHistory(newData), 1500);
   }
 
   const query = async (msg: string) => {
@@ -143,16 +141,11 @@ export const Chat = () => {
                 } else {
                   return [
                     ...prevHistory,
-                    {
-                      content: currentReply,
-                      type: "reply",
-                      id: chatHistoryLength.current + 1,
-                    },
+                    { content: currentReply, type: "reply" },
                   ];
                 }
               });
               if (timeoutRef.current) {
-                chatHistoryLength.current += 1;
                 clearTimeout(timeoutRef.current);
                 timeoutRef.current = window.setTimeout(() => {
                   setIsSending(false);
@@ -160,7 +153,6 @@ export const Chat = () => {
                 }, 5000);
               }
             } else {
-              chatHistoryLength.current += 1;
               // setChatHistory((prevHistory) => [
               //   ...prevHistory,
               //   { content: currentReply, type: "reply" },
@@ -224,7 +216,7 @@ export const Chat = () => {
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll
             endMessage={"没有更多数据了"}
-            dataLength={chatHistoryLength.current}
+            dataLength={chatHistory.length}
             scrollableTarget={"chat-history-list"}
             loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
             inverse={true}
@@ -239,15 +231,13 @@ export const Chat = () => {
           >
             <div ref={bottomRef} />
             <div className={"chat-history-list-content"}>
-              {chatHistory
-                .sort((a, b) => b.id - a.id)
-                .map((record) => {
-                  if (record.type === "query") {
-                    return <UserQuery query={record.content} />;
-                  } else {
-                    return <BotReply reply={record.content} />;
-                  }
-                })}
+              {chatHistory.map((record) => {
+                if (record.type === "query") {
+                  return <UserQuery query={record.content} />;
+                } else {
+                  return <BotReply reply={record.content} />;
+                }
+              })}
             </div>
           </InfiniteScroll>
         </div>
@@ -264,14 +254,9 @@ export const Chat = () => {
             onClick={() => {
               if (!isSending) {
                 canAutoScrollRef.current = true;
-                chatHistoryLength.current += 1;
                 setChatHistory((prevHistory) => [
                   ...prevHistory,
-                  {
-                    content: userInput,
-                    type: "query",
-                    id: chatHistoryLength.current + 1,
-                  },
+                  { content: userInput, type: "query" },
                 ]);
                 setUserInput("");
                 query(userInput);
