@@ -1,13 +1,69 @@
-import { Button, Input } from "@douyinfe/semi-ui";
-import { useState } from "react";
-import { TypeAnimation } from "react-type-animation";
+import { Avatar, Button, Input, List } from "@douyinfe/semi-ui";
+import { useState, useEffect, useRef } from "react";
+import InfiniteScroll from "react-infinite-scroller";
+import { LeftNavBar } from "@/chat/LeftNavBar/LeftNavBar";
+import "./index.scss";
+
+type ChatMessage = {
+  content: string;
+  type: "reply" | "query";
+};
+
+const BotReply = ({ reply }: { reply: string }) => {
+  return (
+    <div className={"bot-reply"}>
+      <Avatar
+        size="medium"
+        alt="Bot"
+        src={"/bot_avatar.png"}
+        className={"bot-avatar"}
+      />
+      <div className={"bot-chat-bubble"}>{reply}</div>
+    </div>
+  );
+};
+
+const UserQuery = ({ query }: { query: string }) => {
+  return (
+    <div className={"user-query"}>
+      <div className={"user-chat-bubble"}>{query}</div>
+      <Avatar size="medium" alt="User" className={"user-avatar"}>
+        YD
+      </Avatar>
+    </div>
+  );
+};
 
 export const Chat = () => {
-  const [userInput, setUserInput] = useState(" ");
-  const [respond, setRespond] = useState("");
-  const [key, setKey] = useState(0);
+  const fakeData: ChatMessage[] = [
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+    { content: "test1", type: "query" },
+    { content: "test1", type: "reply" },
+  ];
+  const [userInput, setUserInput] = useState("");
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
+  const [isSending, setIsSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<number | null>(null);
+
   const query = async (msg: string) => {
     try {
+      setIsSending(true);
       const res = await fetch("https://api.coze.com/open_api/v2/chat", {
         headers: {
           Authorization:
@@ -33,27 +89,69 @@ export const Chat = () => {
       }
 
       const decoder = new TextDecoder();
+      const reader = res.body?.getReader();
+
+      if (!reader) {
+        throw new Error("Reader is undefined");
+      }
+
+      let currentReply = "";
+      timeoutRef.current = window.setTimeout(() => {
+        setIsSending(false);
+      }, 5000);
 
       const stream = new ReadableStream({
-        async start() {
-          for await (const chunk of res.body as any) {
-            const str = decoder.decode(chunk).slice(5);
-            let obj = JSON.parse(str);
+        async start(controller) {
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const str = decoder.decode(value).slice(5);
+            const obj = JSON.parse(str);
+            console.log(obj.is_finish);
             if (!obj.is_finish) {
-              console.log(obj);
-              obj = obj.message;
-              obj = obj.content;
-              console.log(obj);
-              setRespond((prevState) => prevState + obj);
-              setKey((prevState) => prevState + 1);
+              const chunk = obj.message.content;
+              currentReply += chunk;
+              setChatHistory((prevHistory) => {
+                const lastMessage = prevHistory[prevHistory.length - 1];
+                if (lastMessage && lastMessage.type === "reply") {
+                  return [
+                    ...prevHistory.slice(0, -1),
+                    { ...lastMessage, content: currentReply },
+                  ];
+                } else {
+                  return [
+                    ...prevHistory,
+                    { content: currentReply, type: "reply" },
+                  ];
+                }
+              });
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = window.setTimeout(() => {
+                  setIsSending(false);
+                }, 5000);
+              }
+            } else {
+              // setChatHistory((prevHistory) => [
+              //   ...prevHistory,
+              //   { content: currentReply, type: "reply" },
+              // ]);
+              currentReply = "";
+              clearTimeout(timeoutRef.current!);
+              setIsSending(false);
+              break;
             }
           }
+          controller.close();
         },
       });
 
       return new Response(stream);
     } catch (e: any) {
       console.log("Error", e);
+      clearTimeout(timeoutRef.current!);
+      setIsSending(false);
       return new Response(
         JSON.stringify({ msg: e?.message || e?.stack || e }),
         {
@@ -62,53 +160,74 @@ export const Chat = () => {
       );
     }
   };
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory]);
+
+  const isSendButtonDisabled = isSending || !userInput.trim();
+
   return (
-    <div>
-      <Input value={userInput} onChange={setUserInput}></Input>
-      <Button
-        onClick={() => {
-          setRespond("");
-          setKey((prevState) => prevState + 1);
-          query(userInput);
-        }}
-      >
-        发送
-      </Button>
-      <TypeAnimation
-        key={key}
-        className={"type-ani"}
-        splitter={(str) => str.split(/(?= )/)} // 'Lorem ipsum dolor' -> ['Lorem', ' ipsum', ' dolor']
-        sequence={[
-          (el) => {
-            if (el !== null) {
-              el.classList.add("type_ani");
-            }
-          },
-          respond,
-          (el: HTMLElement | null) => {
-            if (el !== null) {
-              el.classList.remove("type_ani");
-            }
+    <div className={"single-chat"}>
+      <LeftNavBar
+        chats={[
+          {
+            chatModel: "gpt-4",
+            chatTitle: "welcome",
+            chosen: true,
           },
         ]}
-        speed={{ type: "keyStrokeDelayInMs", value: 30 }}
-        omitDeletionAnimation={true}
-        preRenderFirstString={true}
-        style={{ fontSize: "1em", display: "block", minHeight: "200px" }}
-        cursor={false}
       />
-      <style>{`
-        .type_ani::after {
-          content: "▌";
-          animation: cursor 1.1s infinite step-start;
-        }
-
-        @keyframes cursor {
-          50% {
-            opacity: 0;
-          }
-        }
-      `}</style>
+      <div className={"single-chat-content"}>
+        <InfiniteScroll
+          threshold={80}
+          useWindow={true}
+          isReverse={true}
+          hasMore={true}
+          loadMore={() => {
+            console.log("LOAD MORE");
+          }}
+          // loader={<h4>Loading...</h4>}
+        >
+          <div className={"chat-history-list"}>
+            <List
+              dataSource={chatHistory}
+              renderItem={(record) => {
+                if (record.type === "query") {
+                  return <UserQuery query={record.content} />;
+                } else {
+                  return <BotReply reply={record.content} />;
+                }
+              }}
+              loading={false}
+            />
+            <div ref={bottomRef} />
+          </div>
+        </InfiniteScroll>
+        <div className={"user-input"}>
+          <Input
+            value={userInput}
+            onChange={(value: string, e: React.ChangeEvent<HTMLInputElement>) =>
+              setUserInput(value)
+            }
+            className={"input-area"}
+          ></Input>
+          <Button
+            className={"send-button"}
+            onClick={() => {
+              setChatHistory((prevHistory) => [
+                ...prevHistory,
+                { content: userInput, type: "query" },
+              ]);
+              setUserInput("");
+              query(userInput);
+            }}
+            disabled={isSendButtonDisabled} // Disable the button when input is empty or sending
+          >
+            发送
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
