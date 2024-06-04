@@ -60,10 +60,12 @@ export const Chat = () => {
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<number | null>(null);
-
+  const [buttonContent, setButtonContent] = useState("发送");
+  const isSendingRef = useRef(isSending); // 创建一个ref来跟踪isSending的值
   const query = async (msg: string) => {
     try {
       setIsSending(true);
+      setButtonContent("终止");
       const res = await fetch("https://api.coze.com/open_api/v2/chat", {
         headers: {
           Authorization:
@@ -98,6 +100,7 @@ export const Chat = () => {
       let currentReply = "";
       timeoutRef.current = window.setTimeout(() => {
         setIsSending(false);
+        setButtonContent("发送");
       }, 5000);
 
       const stream = new ReadableStream({
@@ -130,6 +133,7 @@ export const Chat = () => {
                 clearTimeout(timeoutRef.current);
                 timeoutRef.current = window.setTimeout(() => {
                   setIsSending(false);
+                  setButtonContent("发送");
                 }, 5000);
               }
             } else {
@@ -140,6 +144,7 @@ export const Chat = () => {
               currentReply = "";
               clearTimeout(timeoutRef.current!);
               setIsSending(false);
+              setButtonContent("发送");
               break;
             }
           }
@@ -152,6 +157,7 @@ export const Chat = () => {
       console.log("Error", e);
       clearTimeout(timeoutRef.current!);
       setIsSending(false);
+      setButtonContent("发送");
       return new Response(
         JSON.stringify({ msg: e?.message || e?.stack || e }),
         {
@@ -164,9 +170,19 @@ export const Chat = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
+  useEffect(() => {
+    // 同步isSending的值到ref
+    isSendingRef.current = isSending;
+  }, [isSending]); // 依赖于isSending，当isSending变化时更新ref
 
-  const isSendButtonDisabled = isSending || !userInput.trim();
-
+  useEffect(() => {
+    return () => {
+      // 这里的代码会在组件卸载时执行
+      if (isSendingRef.current) {
+        console.log("发送终止请求");
+      }
+    };
+  }, []); // 空数组表示这个effect没有依赖项，因此不会重新执行
   return (
     <div className={"single-chat"}>
       <LeftNavBar
@@ -185,7 +201,7 @@ export const Chat = () => {
           isReverse={true}
           hasMore={true}
           loadMore={() => {
-            console.log("LOAD MORE");
+            // console.log("LOAD MORE");
           }}
           // loader={<h4>Loading...</h4>}
         >
@@ -215,16 +231,21 @@ export const Chat = () => {
           <Button
             className={"send-button"}
             onClick={() => {
-              setChatHistory((prevHistory) => [
-                ...prevHistory,
-                { content: userInput, type: "query" },
-              ]);
-              setUserInput("");
-              query(userInput);
+              if (!isSending) {
+                setChatHistory((prevHistory) => [
+                  ...prevHistory,
+                  { content: userInput, type: "query" },
+                ]);
+                setUserInput("");
+                query(userInput);
+              } else {
+                console.log("发送结束请求");
+                setIsSending(false);
+              }
             }}
-            disabled={isSendButtonDisabled} // Disable the button when input is empty or sending
+            disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending
           >
-            发送
+            {isSending ? <>{buttonContent}</> : <>发送</>}
           </Button>
         </div>
       </div>
