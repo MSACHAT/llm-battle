@@ -1,14 +1,12 @@
 import { FC, useCallback, useEffect } from "react";
 import { throttle } from "lodash-es";
-import { ConversationMode, Message } from "@/interfaces";
+import { Message } from "@/interfaces";
 
 const MessageItem: FC<{
   message: Message;
-  mode?: ConversationMode;
   index?: number;
 }> = ({ message, index }) => {
   // const createdAt = getRelativeTime(message.createdAt, true);
-
   return (
     <div>
       {message.role === "assistant" ? <div>Assistant Avatar</div> : null}
@@ -23,9 +21,8 @@ const MessageItem: FC<{
 const MessageBox: FC<{
   streamMessage: string;
   messages: Message[];
-  mode: ConversationMode;
   loading: boolean;
-}> = ({ streamMessage, messages, mode, loading }) => {
+}> = ({ streamMessage, messages, loading }) => {
   const handleAutoScroll = useCallback(
     throttle(() => {
       const element = document.querySelector("#content");
@@ -55,7 +52,7 @@ const MessageBox: FC<{
     <div id="content">
       {messages.length === 0 ? <div>No messages</div> : null}
       {messages.map((message, index) => (
-        <MessageItem key={index} index={index} mode={mode} message={message} />
+        <MessageItem key={index} index={index} message={message} />
       ))}
       {streamMessage ? (
         <MessageItem message={{ role: "assistant", content: streamMessage }} />

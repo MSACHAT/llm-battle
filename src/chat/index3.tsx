@@ -1,20 +1,49 @@
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import MessageBox from "./MessageBox";
 import { Message, ReactSetState } from "@/interfaces";
-import { Input } from "@douyinfe/semi-ui";
-import axios from "axios";
+import { Button, Input } from "@douyinfe/semi-ui";
+import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
+import "./index.scss";
+import InfiniteScroll from "react-infinite-scroll-component";
 interface ContentProps {
   setActiveSetting: ReactSetState<boolean>;
 }
-
+type ChatMessage = {
+  content: string;
+  type: "reply" | "query";
+  id: number;
+};
+const fakeData: ChatMessage[] = [
+  { content: "test1", type: "query", id: 1 },
+  { content: "test1", type: "reply", id: 2 },
+  { content: "test1", type: "query", id: 3 },
+  { content: "test1", type: "reply", id: 4 },
+  { content: "test1", type: "query", id: 5 },
+  { content: "test1", type: "reply", id: 6 },
+  { content: "test1", type: "query", id: 7 },
+  { content: "test1", type: "reply", id: 8 },
+  { content: "test1", type: "query", id: 9 },
+  { content: "test1", type: "reply", id: 10 },
+  { content: "test1", type: "query", id: 11 },
+  { content: "test1", type: "reply", id: 12 },
+  { content: "test1", type: "query", id: 13 },
+  { content: "test1", type: "reply", id: 14 },
+  { content: "test1", type: "query", id: 15 },
+  { content: "test1", type: "reply", id: 16 },
+  { content: "test1", type: "query", id: 17 },
+  { content: "test2", type: "reply", id: 18 },
+];
 const Content: FC<ContentProps> = ({ setActiveSetting }) => {
   // input text
   const [text, setText] = useState("");
   const [streamMessageMap, setStreamMessageMap] = useState<
     Record<string, string>
   >({});
+  const bottomRef = useRef<HTMLDivElement>(null);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
-
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
+  const MAX_DATA = 30;
+  const hasMore = chatHistory.length < MAX_DATA;
   // prompt
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -85,12 +114,10 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       });
 
       const stream = res.body;
-      const reader = stream.getReader();
+      const reader = stream?.getReader();
       const decoder = new TextDecoder();
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+      while (true && reader) {
         const { value, done } = await reader.read();
-        console.log(value);
         if (value) {
           const jsonString = decoder
             .decode(value)
@@ -172,25 +199,83 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="flex-1 overflow-auto common-scrollbar p-5 pb-0">
-        <MessageBox
-          streamMessage={streamMessage}
-          messages={messages}
-          mode={mode}
-          loading={loading}
-        />
-      </div>
-      <Input
-        value={text}
-        onChange={(v) => setText(v)}
-        // streamMessage={streamMessage}
-        onEnterPress={() => {
-          sendTextChatMessages(text);
-        }}
-        // onCancel={stopGenerate}
-        // loading={loading}
+    <div className={"single-chat"}>
+      <LeftNavBar
+        chats={[
+          {
+            chatModel: "gpt-4",
+            chatTitle: "welcome",
+            chosen: true,
+          },
+        ]}
       />
+      <div className={"single-chat-content"}>
+        <div className={"chat-history-list"} id="chat-history-list">
+          <InfiniteScroll
+            endMessage={"没有更多数据了"}
+            dataLength={chatHistory.length}
+            scrollableTarget={"chat-history-list"}
+            loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
+            inverse={true}
+            hasMore={hasMore}
+            next={() => {
+              console.log();
+            }}
+            style={{
+              display: "flex",
+              flexDirection: "column-reverse",
+              overflow: "visible",
+            }}
+          >
+            <div ref={bottomRef} />
+            <div className={"chat-history-list-content"}>
+              <MessageBox
+                streamMessage={streamMessage}
+                messages={messages}
+                loading={loading}
+              />
+            </div>
+          </InfiniteScroll>
+        </div>
+        <div className={"user-input"}>
+          <Input
+            style={{ background: "white" }}
+            value={text}
+            onChange={(v) => setText(v)}
+            // streamMessage={streamMessage}
+            onEnterPress={() => {
+              sendTextChatMessages(text);
+            }}
+            // onCancel={stopGenerate}
+            // loading={loading}
+          />
+          {/*<Button*/}
+          {/*  className={"send-button"}*/}
+          {/*  onClick={() => {*/}
+          {/*    if (!isSending) {*/}
+          {/*      canAutoScrollRef.current = true;*/}
+          {/*      chatHistoryLength.current += 1;*/}
+          {/*      setChatHistory((prevHistory) => [*/}
+          {/*        ...prevHistory,*/}
+          {/*        {*/}
+          {/*          content: userInput,*/}
+          {/*          type: "query",*/}
+          {/*          id: chatHistoryLength.current + 1,*/}
+          {/*        },*/}
+          {/*      ]);*/}
+          {/*      setUserInput("");*/}
+          {/*      query(userInput);*/}
+          {/*    } else {*/}
+          {/*      console.log("发送结束请求");*/}
+          {/*      setIsSending(false);*/}
+          {/*    }*/}
+          {/*  }}*/}
+          {/*  disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending*/}
+          {/*>*/}
+          {/*  {isSending ? <>{buttonContent}</> : <>发送</>}*/}
+          {/*</Button>*/}
+        </div>
+      </div>
     </div>
   );
 };
