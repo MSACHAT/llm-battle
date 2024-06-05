@@ -1,7 +1,7 @@
 import { FC, useRef, useState } from "react";
 import MessageBox from "./MessageBox";
 import { Message, ReactSetState } from "@/interfaces";
-import { Button, Input } from "@douyinfe/semi-ui";
+import { Avatar, Button, Input } from "@douyinfe/semi-ui";
 import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -13,6 +13,7 @@ type ChatMessage = {
   type: "reply" | "query";
   id: number;
 };
+
 const fakeData: ChatMessage[] = [
   { content: "test1", type: "query", id: 1 },
   { content: "test1", type: "reply", id: 2 },
@@ -36,44 +37,19 @@ const fakeData: ChatMessage[] = [
 const Content: FC<ContentProps> = ({ setActiveSetting }) => {
   // input text
   const [text, setText] = useState("");
-  const [streamMessageMap, setStreamMessageMap] = useState<
-    Record<string, string>
-  >({});
   const bottomRef = useRef<HTMLDivElement>(null);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
   const MAX_DATA = 30;
   const hasMore = chatHistory.length < MAX_DATA;
-  // prompt
-  const [showPrompt, setShowPrompt] = useState(false);
-
   // controller
   const [controller, setController] = useState<any>(null);
 
-  // single conversation state
-  const [conversation, setConversation] = useState({
-    id: "1",
-    messages: [] as Message[],
-    mode: "text",
-    title: "",
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [streamMessage, setStreamMessage] = useState("");
 
-  const { messages } = conversation;
-  const { mode } = conversation;
-  const streamMessage = streamMessageMap[conversation.id] ?? "";
-  const loading = loadingMap[conversation.id];
-
-  const updateMessages = (msgs: Message[]) => {
-    setConversation((prev) => ({
-      ...prev,
-      updatedAt: msgs.slice(-1)?.[0]?.createdAt,
-      messages: msgs,
-      // If no title, set the first content
-      title: prev.title || msgs[0].content,
-    }));
-  };
   const sendTextChatMessages = async (content: string) => {
-    const current = conversation.id;
     // temp stream message
     let tempMessage = "";
     const input: Message[] = [
@@ -84,12 +60,10 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       },
     ];
     const allMessages: Message[] = messages.concat(input);
-    updateMessages(allMessages);
+    setMessages(allMessages);
     setText("");
-    setLoadingMap((map) => ({
-      ...map,
-      [current]: true,
-    }));
+    setLoading(true);
+
     try {
       const abortController = new AbortController();
       setController(abortController);
@@ -134,17 +108,14 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           if (obj.message.content) {
             tempMessage += obj.message.content;
             // eslint-disable-next-line no-loop-func
-            setStreamMessageMap((map) => ({
-              ...map,
-              [current]: tempMessage,
-            }));
+            setStreamMessage(tempMessage);
           }
         }
         if (done) {
           break;
         }
       }
-      updateMessages(
+      setMessages(
         allMessages.concat([
           {
             role: "assistant",
@@ -153,15 +124,13 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           },
         ]),
       );
-      setStreamMessageMap((map) => ({
-        ...map,
-        [current]: "",
-      }));
+      setStreamMessage("");
+
       tempMessage = "";
     } catch (e: any) {
       // abort manually or not
       if (!tempMessage) {
-        updateMessages(
+        setMessages(
           allMessages.concat([
             {
               role: "assistant",
@@ -173,16 +142,13 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       }
     } finally {
       setController(null);
-      setLoadingMap((map) => ({
-        ...map,
-        [current]: false,
-      }));
+      setLoading(false);
     }
   };
   const stopGenerate = () => {
     controller?.abort?.();
     if (streamMessage) {
-      updateMessages(
+      setMessages(
         messages.concat([
           {
             role: "assistant",
@@ -191,10 +157,7 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           },
         ]),
       );
-      setStreamMessageMap((map) => ({
-        ...map,
-        [conversation.id]: "",
-      }));
+      setStreamMessage("");
     }
   };
 
