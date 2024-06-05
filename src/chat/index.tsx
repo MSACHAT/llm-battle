@@ -81,13 +81,14 @@ export const Chat = () => {
   }
 
   const query = async (msg: string) => {
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
     try {
       setIsSending(true);
       setButtonContent("终止");
       const res = await fetch("https://api.coze.com/open_api/v2/chat", {
         headers: {
           Authorization:
-            "Bearer pat_9qv4hQgwIGqJLxeqX7b0D0v7L8St7qHa4U0pvDxMblA4LzIO7ORkq135sSB2DGUt",
+            "Bearer pat_4F9lbr5UTmXpGJClGfa6HylNSSIFkKdbJu4cUwr2mr8cPcV5wk8IpOvI94xG0oNm",
           "Content-Type": "application/json",
           Accept: "*/*",
           Host: "api.coze.com",
@@ -120,16 +121,20 @@ export const Chat = () => {
         setIsSending(false);
         setButtonContent("发送");
       }, 5000);
-
+      await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
       const stream = new ReadableStream({
         async start(controller) {
           // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const str = decoder.decode(value).slice(5);
-            const obj = JSON.parse(str);
-            console.log(obj.is_finish);
+            console.log(done, decoder.decode(value));
+            const jsonString = decoder
+              .decode(value)
+              .replace(/^data:/, "")
+              .trim();
+            const obj = JSON.parse(jsonString);
+            console.log(obj, obj.is_finish);
             if (!obj.is_finish) {
               const chunk = obj.message.content;
               currentReply += chunk;
@@ -209,6 +214,7 @@ export const Chat = () => {
       }
     };
   }, []); // 空数组表示这个effect没有依赖项，因此不会重新执行
+  console.log(chatHistory);
   return (
     <div className={"single-chat"}>
       <LeftNavBar
@@ -235,17 +241,16 @@ export const Chat = () => {
               flexDirection: "column-reverse",
               overflow: "visible",
             }}
-            // loader={<h4>Loading...</h4>}
           >
             <div ref={bottomRef} />
             <div className={"chat-history-list-content"}>
               {chatHistory
                 .sort((a, b) => b.id - a.id)
-                .map((record) => {
+                .map((record, index) => {
                   if (record.type === "query") {
-                    return <UserQuery query={record.content} />;
+                    return <UserQuery key={index} query={record.content} />;
                   } else {
-                    return <BotReply reply={record.content} />;
+                    return <BotReply key={index} reply={record.content} />;
                   }
                 })}
             </div>

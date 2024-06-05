@@ -64,33 +64,29 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
     try {
       const abortController = new AbortController();
       setController(abortController);
-
-      const res = await axios.post(
-        "https://api.coze.com/open_api/v2/chat",
-        {
+      const res = await fetch("https://api.coze.com/open_api/v2/chat", {
+        headers: {
+          Authorization:
+            "Bearer pat_4F9lbr5UTmXpGJClGfa6HylNSSIFkKdbJu4cUwr2mr8cPcV5wk8IpOvI94xG0oNm",
+          "Content-Type": "application/json",
+          Accept: "*/*",
+          Host: "api.coze.com",
+          Connection: "keep-alive",
+        },
+        method: "POST",
+        body: JSON.stringify({
           conversation_id: "123",
           bot_id: "7372104038311739410",
           user: "29032201862555",
           query: content,
           stream: true,
-        },
-        {
-          headers: {
-            Authorization:
-              "Bearer pat_4F9lbr5UTmXpGJClGfa6HylNSSIFkKdbJu4cUwr2mr8cPcV5wk8IpOvI94xG0oNm",
-            "Content-Type": "application/json",
-            Accept: "*/*",
-            Host: "api.coze.com",
-            Connection: "keep-alive",
-          },
-          signal: abortController.signal,
-          responseType: "stream",
-        },
-      );
+        }),
+        signal: abortController.signal,
+      });
 
-      const reader = res.data.getReader();
+      const stream = res.body;
+      const reader = stream.getReader();
       const decoder = new TextDecoder();
-
       // eslint-disable-next-line no-constant-condition
       while (true) {
         const { value, done } = await reader.read();
