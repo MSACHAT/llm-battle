@@ -5,9 +5,7 @@ import { Avatar, Button, Input } from "@douyinfe/semi-ui";
 import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import InfiniteScroll from "react-infinite-scroll-component";
-interface ContentProps {
-  setActiveSetting: ReactSetState<boolean>;
-}
+
 type ChatMessage = {
   content: string;
   type: "reply" | "query";
@@ -52,6 +50,7 @@ const Content: FC = () => {
   const sendTextChatMessages = async (content: string) => {
     // temp stream message
     let tempMessage = "";
+    console.log(tempMessage, 11111);
     const input: Message[] = [
       {
         type: "query",
@@ -62,6 +61,7 @@ const Content: FC = () => {
     ];
     const allMessages: Message[] = messages.concat(input);
     setMessages(allMessages);
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
     setText("");
     setLoading(true);
 
@@ -98,6 +98,7 @@ const Content: FC = () => {
           break;
         }
         if (value) {
+          console.log(decoder.decode(value), tempMessage);
           const jsonString = decoder
             .decode(value)
             .replace(/^data:/, "")
@@ -108,21 +109,28 @@ const Content: FC = () => {
           }
           if (obj.message.content && !obj.is_finish) {
             tempMessage += obj.message.content;
+            console.log(tempMessage, 22222);
             // eslint-disable-next-line no-loop-func
             setStreamMessage(tempMessage);
           }
         }
       }
-      setMessages((msgs) =>
-        msgs.concat([
-          {
-            type: "reply",
-            content: streamMessage,
-            createdAt: Date.now(),
-            id: msgs.length,
-          },
-        ]),
-      );
+      const now = Date.now();
+      const newMessage = {
+        content: tempMessage,
+        createdAt: now,
+        id: messages.length,
+      };
+
+      console.log(newMessage);
+      setMessages((prevMessages) => {
+        const updatedMessage = {
+          ...newMessage,
+          type: "reply",
+          id: prevMessages.length,
+        };
+        return prevMessages.concat([updatedMessage]);
+      });
       setStreamMessage("");
       tempMessage = "";
     } catch (e: any) {
@@ -133,7 +141,7 @@ const Content: FC = () => {
             {
               type: "reply",
               id: msgs.length,
-              content: `Error: ${e.message + e.stack + e}`,
+              content: `Error: ${e.message || e.stack || e}`,
               createdAt: Date.now(),
             },
           ]),
@@ -160,6 +168,7 @@ const Content: FC = () => {
       setStreamMessage("");
     }
   };
+  console.log(messages);
 
   return (
     <div className={"single-chat"}>
@@ -202,6 +211,7 @@ const Content: FC = () => {
         </div>
         <div className={"user-input"}>
           <Input
+            autoFocus
             style={{ background: "white" }}
             value={text}
             onChange={(v) => setText(v)}
