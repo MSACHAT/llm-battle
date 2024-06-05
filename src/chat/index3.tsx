@@ -1,21 +1,8 @@
-/* eslint-disable no-console */
-import { FC, useContext, useEffect, useState } from "react";
-import MessageBox from "@components/MessageBox";
-import { Message, ReactSetState } from "@interfaces";
-import GlobalContext from "@contexts/global";
-import { hasMathJax, initMathJax, renderMaxJax } from "@utils/markdown";
-import { hasMath } from "@utils";
-import { midjourneyConfigs } from "@configs";
-import {
-  type MessageItem,
-  type MessageType,
-  isInProgress,
-  getHashFromCustomId,
-} from "midjourney-fetch";
-import { updateComponentStatus } from "@utils/midjourney";
-import MessageInput from "./MessageInput";
-import ContentHeader from "./ContentHeader";
-
+import { FC, useState } from "react";
+import MessageBox from "./MessageBox";
+import { Message, ReactSetState } from "@/interfaces";
+import { Input } from "@douyinfe/semi-ui";
+import axios from "axios";
 interface ContentProps {
   setActiveSetting: ReactSetState<boolean>;
 }
@@ -32,44 +19,32 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
   const [showPrompt, setShowPrompt] = useState(false);
 
   // controller
-  const [controller, setController] = useState<AbortController>(null);
+  const [controller, setController] = useState<any>(null);
 
-  const conversation = conversations[currentId];
-  const messages = conversation?.messages ?? [];
-  const mode = conversation?.mode ?? "text";
-  const streamMessage = streamMessageMap[currentId] ?? "";
-  const loading = loadingMap[currentId];
+  // single conversation state
+  const [conversation, setConversation] = useState({
+    id: "1",
+    messages: [] as Message[],
+    mode: "text",
+    title: "",
+  });
 
-  useEffect(() => {
-    // lazyload, init mathJax when hasMath
-    if (messages.some((message) => hasMath(message.content))) {
-      initMathJax().then(() => renderMaxJax());
-    }
-  }, [messages]);
-
-  // pre initialization
-  useEffect(() => {
-    if (hasMathJax()) return;
-    if (hasMath(streamMessage)) {
-      initMathJax();
-    }
-  }, [streamMessage]);
+  const { messages } = conversation;
+  const { mode } = conversation;
+  const streamMessage = streamMessageMap[conversation.id] ?? "";
+  const loading = loadingMap[conversation.id];
 
   const updateMessages = (msgs: Message[]) => {
-    setConversations((msg) => ({
-      ...msg,
-      [currentId]: {
-        ...conversations[currentId],
-        updatedAt: msgs.slice(-1)?.[0]?.createdAt,
-        messages: msgs,
-        // If no title, set the first content
-        title: conversations[currentId].title || msgs[0].content,
-      },
+    setConversation((prev) => ({
+      ...prev,
+      updatedAt: msgs.slice(-1)?.[0]?.createdAt,
+      messages: msgs,
+      // If no title, set the first content
+      title: prev.title || msgs[0].content,
     }));
   };
-
   const sendTextChatMessages = async (content: string) => {
-    const current = currentId;
+    const current = conversation.id;
     // temp stream message
     let tempMessage = "";
     const input: Message[] = [
@@ -89,73 +64,69 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
     try {
       const abortController = new AbortController();
       setController(abortController);
-      const res = await fetch("/api/completions", {
-        method: "POST",
-        body: JSON.stringify({
-          key: configs.openAIApiKey,
-          model: configs.model,
-          messages: configs.continuous
-            ? allMessages.slice(-1 * (configs.messagesCount ?? 4) - 1)
-            : input,
-          temperature: configs.temperature ?? 1,
-          password: configs.password,
-        }),
-        signal: abortController.signal,
-      });
-      if (res.status < 400 && res.ok) {
-        const stream = res.body;
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { value, done } = await reader.read();
-          if (value) {
-            const char = decoder.decode(value);
-            if (char === "\n" && tempMessage.endsWith("\n")) {
-              continue;
-            }
-            if (char) {
-              tempMessage += char;
-              // eslint-disable-next-line no-loop-func
-              setStreamMessageMap((map) => ({
-                ...map,
-                [current]: tempMessage,
-              }));
-            }
+
+      const res = await axios.post(
+        "https://api.coze.com/open_api/v2/chat",
+        {
+          conversation_id: "123",
+          bot_id: "7372104038311739410",
+          user: "29032201862555",
+          query: content,
+          stream: true,
+        },
+        {
+          headers: {
+            Authorization:
+              "Bearer pat_4F9lbr5UTmXpGJClGfa6HylNSSIFkKdbJu4cUwr2mr8cPcV5wk8IpOvI94xG0oNm",
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            Host: "api.coze.com",
+            Connection: "keep-alive",
+          },
+          signal: abortController.signal,
+          responseType: "stream",
+        },
+      );
+
+      const reader = res.data.getReader();
+      const decoder = new TextDecoder();
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done } = await reader.read();
+        if (value) {
+          const char = decoder.decode(value);
+          if (char === "\n" && tempMessage.endsWith("\n")) {
+            continue;
           }
-          if (done) {
-            break;
+          if (char) {
+            tempMessage += char;
+            // eslint-disable-next-line no-loop-func
+            setStreamMessageMap((map) => ({
+              ...map,
+              [current]: tempMessage,
+            }));
           }
         }
-        updateMessages(
-          allMessages.concat([
-            {
-              role: "assistant",
-              content: tempMessage,
-              createdAt: Date.now(),
-            },
-          ]),
-        );
-        setStreamMessageMap((map) => ({
-          ...map,
-          [current]: "",
-        }));
-        tempMessage = "";
-      } else {
-        const { msg, error } = await res.json();
-        updateMessages(
-          allMessages.concat([
-            {
-              role: "assistant",
-              content: `[${res.status}]Error: ${
-                msg || error?.message || res.statusText || "Unknown"
-              }`,
-              createdAt: Date.now(),
-            },
-          ]),
-        );
+        if (done) {
+          break;
+        }
       }
-    } catch (e) {
+      updateMessages(
+        allMessages.concat([
+          {
+            role: "assistant",
+            content: tempMessage,
+            createdAt: Date.now(),
+          },
+        ]),
+      );
+      setStreamMessageMap((map) => ({
+        ...map,
+        [current]: "",
+      }));
+      tempMessage = "";
+    } catch (e: any) {
       // abort manually or not
       if (!tempMessage) {
         updateMessages(
@@ -176,7 +147,6 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       }));
     }
   };
-
   const stopGenerate = () => {
     controller?.abort?.();
     if (streamMessage) {
@@ -191,19 +161,13 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       );
       setStreamMessageMap((map) => ({
         ...map,
-        [currentId]: "",
+        [conversation.id]: "",
       }));
     }
   };
 
   return (
     <div className="flex flex-col h-full w-full">
-      <ContentHeader
-        conversation={conversation}
-        setActiveSetting={setActiveSetting}
-        setShowPrompt={setShowPrompt}
-        setText={setText}
-      />
       <div className="flex-1 overflow-auto common-scrollbar p-5 pb-0">
         <MessageBox
           streamMessage={streamMessage}
@@ -212,17 +176,15 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           loading={loading}
         />
       </div>
-      <MessageInput
-        text={text}
-        setText={setText}
-        streamMessage={streamMessage}
-        showPrompt={showPrompt && mode !== "image"}
-        setShowPrompt={setShowPrompt}
-        onSubmit={async (message: string) => {
-          sendTextChatMessages(message);
+      <Input
+        value={text}
+        onChange={(v) => setText(v)}
+        // streamMessage={streamMessage}
+        onEnterPress={() => {
+          sendTextChatMessages(text);
         }}
-        onCancel={stopGenerate}
-        loading={loading}
+        // onCancel={stopGenerate}
+        // loading={loading}
       />
     </div>
   );
