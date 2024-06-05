@@ -6,10 +6,10 @@ const meta = {
   component: Content,
   parameters: {
     layout: "fullscreen",
-    // backgrounds: {
-    //   default: "default-bg", // Default background
-    //   values: [{ name: "default-bg", value: "rgb(28, 30, 41)" }],
-    // },
+    backgrounds: {
+      default: "default-bg", // Default background
+      values: [{ name: "default-bg", value: "rgb(28, 30, 41)" }],
+    },
   },
 } satisfies Meta<typeof Content>;
 

@@ -34,7 +34,7 @@ const fakeData: ChatMessage[] = [
   { content: "test1", type: "query", id: 17 },
   { content: "test2", type: "reply", id: 18 },
 ];
-const Content: FC<ContentProps> = ({ setActiveSetting }) => {
+const Content: FC = () => {
   // input text
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -113,27 +113,26 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           }
         }
       }
-      setMessages(
-        allMessages.concat([
+      setMessages((msgs) =>
+        msgs.concat([
           {
             type: "reply",
-            content: tempMessage,
+            content: streamMessage,
             createdAt: Date.now(),
-            id: messages.length,
+            id: msgs.length,
           },
         ]),
       );
       setStreamMessage("");
-
       tempMessage = "";
     } catch (e: any) {
       // abort manually or not
       if (!tempMessage) {
-        setMessages(
-          allMessages.concat([
+        setMessages((msgs) =>
+          msgs.concat([
             {
-              type: "query",
-              id: messages.length,
+              type: "reply",
+              id: msgs.length,
               content: `Error: ${e.message + e.stack + e}`,
               createdAt: Date.now(),
             },
@@ -148,11 +147,11 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
   const stopGenerate = () => {
     controller?.abort?.();
     if (streamMessage) {
-      setMessages(
-        messages.concat([
+      setMessages((msgs) =>
+        msgs.concat([
           {
             type: "reply",
-            id: messages.length,
+            id: msgs.length,
             content: streamMessage,
             createdAt: Date.now(),
           },

@@ -60,7 +60,6 @@ const MessageBox: FC<{
   }, [messages]);
   return (
     <div id="content">
-      {messages.length === 0 ? <div>No messages</div> : null}
       {messages.map((message, index) => {
         if (message.type === "query") {
           return <UserQuery key={index} content={message.content} />;
