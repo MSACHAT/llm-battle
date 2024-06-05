@@ -92,17 +92,16 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       const decoder = new TextDecoder();
       while (true && reader) {
         const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
         if (value) {
           const jsonString = decoder
             .decode(value)
             .replace(/^data:/, "")
             .trim();
           const obj = JSON.parse(jsonString);
-
-          if (obj.message.content === "\n" && tempMessage.endsWith("\n")) {
-            continue;
-          }
-          if (obj.msg_type === "generate_answer_finish") {
+          if (obj.is_finish) {
             break;
           }
           if (obj.message.content) {
@@ -110,9 +109,6 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
             // eslint-disable-next-line no-loop-func
             setStreamMessage(tempMessage);
           }
-        }
-        if (done) {
-          break;
         }
       }
       setMessages(
