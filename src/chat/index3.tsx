@@ -59,9 +59,7 @@ const Content: FC = () => {
         id: messages.length,
       },
     ];
-    const allMessages: Message[] = messages.concat(input);
-    setMessages(allMessages);
-    await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+    setMessages((msg) => msg.concat(input));
     setText("");
     setLoading(true);
 
@@ -136,16 +134,29 @@ const Content: FC = () => {
     } catch (e: any) {
       // abort manually or not
       if (!tempMessage) {
-        setMessages((msgs) =>
-          msgs.concat([
-            {
-              type: "reply",
-              id: msgs.length,
-              content: `Error: ${e.message || e.stack || e}`,
-              createdAt: Date.now(),
-            },
-          ]),
-        );
+        if (e.name === "AbortError") {
+          setMessages((msgs) =>
+            msgs.concat([
+              {
+                type: "reply",
+                id: msgs.length,
+                content: `停止输出`,
+                createdAt: Date.now(),
+              },
+            ]),
+          );
+        } else {
+          setMessages((msgs) =>
+            msgs.concat([
+              {
+                type: "reply",
+                id: msgs.length,
+                content: `Error: ${e.message || e.stack || e}`,
+                createdAt: Date.now(),
+              },
+            ]),
+          );
+        }
       }
     } finally {
       setController(null);
@@ -216,12 +227,12 @@ const Content: FC = () => {
             value={text}
             onChange={(v) => setText(v)}
             // streamMessage={streamMessage}
-            onEnterPress={() => {
+            onEnterPress={async () => {
               stopGenerate();
+              await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
               sendTextChatMessages(text);
             }}
             // onCancel={stopGenerate}
-            // loading={loading}
           />
           {/*<Button*/}
           {/*  className={"send-button"}*/}
