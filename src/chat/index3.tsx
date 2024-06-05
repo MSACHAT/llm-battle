@@ -90,13 +90,22 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       // eslint-disable-next-line no-constant-condition
       while (true) {
         const { value, done } = await reader.read();
+        console.log(value);
         if (value) {
-          const char = decoder.decode(value);
-          if (char === "\n" && tempMessage.endsWith("\n")) {
+          const jsonString = decoder
+            .decode(value)
+            .replace(/^data:/, "")
+            .trim();
+          const obj = JSON.parse(jsonString);
+
+          if (obj.message.content === "\n" && tempMessage.endsWith("\n")) {
             continue;
           }
-          if (char) {
-            tempMessage += char;
+          if (obj.msg_type === "generate_answer_finish") {
+            break;
+          }
+          if (obj.message.content) {
+            tempMessage += obj.message.content;
             // eslint-disable-next-line no-loop-func
             setStreamMessageMap((map) => ({
               ...map,
