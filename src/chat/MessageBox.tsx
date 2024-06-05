@@ -1,19 +1,30 @@
 import { FC, useCallback, useEffect } from "react";
 import { throttle } from "lodash-es";
 import { Message } from "@/interfaces";
+import { Avatar } from "@douyinfe/semi-ui";
+import "./index.scss";
 
-const MessageItem: FC<{
-  message: Message;
-  index?: number;
-}> = ({ message, index }) => {
-  // const createdAt = getRelativeTime(message.createdAt, true);
+const BotReply = ({ content }: { content: string }) => {
   return (
-    <div>
-      {message.role === "assistant" ? <div>Assistant Avatar</div> : null}
-      <div>
-        <div>{message.content}</div>
-        {/*<div>{createdAt ? <div>{createdAt}</div> : <div />}</div>*/}
-      </div>
+    <div className={"bot-reply"}>
+      <Avatar
+        size="medium"
+        alt="Bot"
+        src={"/bot_avatar.png"}
+        className={"bot-avatar"}
+      />
+      <div className={"bot-chat-bubble"}>{content}</div>
+    </div>
+  );
+};
+
+const UserQuery = ({ content }: { content: string }) => {
+  return (
+    <div className={"user-query"}>
+      <div className={"user-chat-bubble"}>{content}</div>
+      <Avatar size="medium" alt="User" className={"user-avatar"}>
+        YD
+      </Avatar>
     </div>
   );
 };
@@ -47,16 +58,17 @@ const MessageBox: FC<{
       clearTimeout(clock);
     };
   }, [messages]);
-
   return (
     <div id="content">
       {messages.length === 0 ? <div>No messages</div> : null}
-      {messages.map((message, index) => (
-        <MessageItem key={index} index={index} message={message} />
-      ))}
-      {streamMessage ? (
-        <MessageItem message={{ role: "assistant", content: streamMessage }} />
-      ) : null}
+      {messages.map((message, index) => {
+        if (message.type === "query") {
+          return <UserQuery key={index} content={message.content} />;
+        } else {
+          return <BotReply key={index} content={message.content} />;
+        }
+      })}
+      {streamMessage ? <BotReply content={streamMessage} /> : null}
       {loading ? <div>Loading...</div> : null}
     </div>
   );

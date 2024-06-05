@@ -54,9 +54,10 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
     let tempMessage = "";
     const input: Message[] = [
       {
-        role: "user",
+        type: "query",
         content,
         createdAt: Date.now(),
+        id: messages.length,
       },
     ];
     const allMessages: Message[] = messages.concat(input);
@@ -90,8 +91,9 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       const stream = res.body;
       const reader = stream?.getReader();
       const decoder = new TextDecoder();
-      while (true && reader) {
-        const { value, done } = await reader.read();
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done } = await reader!.read();
         if (done) {
           break;
         }
@@ -104,7 +106,7 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
           if (obj.is_finish) {
             break;
           }
-          if (obj.message.content) {
+          if (obj.message.content && !obj.is_finish) {
             tempMessage += obj.message.content;
             // eslint-disable-next-line no-loop-func
             setStreamMessage(tempMessage);
@@ -114,9 +116,10 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       setMessages(
         allMessages.concat([
           {
-            role: "assistant",
+            type: "reply",
             content: tempMessage,
             createdAt: Date.now(),
+            id: messages.length,
           },
         ]),
       );
@@ -129,8 +132,9 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
         setMessages(
           allMessages.concat([
             {
-              role: "assistant",
-              content: `Error: ${e.message || e.stack || e}`,
+              type: "query",
+              id: messages.length,
+              content: `Error: ${e.message + e.stack + e}`,
               createdAt: Date.now(),
             },
           ]),
@@ -147,7 +151,8 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
       setMessages(
         messages.concat([
           {
-            role: "assistant",
+            type: "reply",
+            id: messages.length,
             content: streamMessage,
             createdAt: Date.now(),
           },
@@ -203,6 +208,7 @@ const Content: FC<ContentProps> = ({ setActiveSetting }) => {
             onChange={(v) => setText(v)}
             // streamMessage={streamMessage}
             onEnterPress={() => {
+              stopGenerate();
               sendTextChatMessages(text);
             }}
             // onCancel={stopGenerate}

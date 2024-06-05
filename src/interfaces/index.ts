@@ -1,7 +1,7 @@
 export interface Message {
   content: string;
-  role: "assistant" | "user";
-
+  type: "reply" | "query";
+  id: number;
   createdAt?: number;
   expiredAt?: number; // for image mode
 }
