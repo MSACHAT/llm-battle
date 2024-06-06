@@ -4,8 +4,24 @@ import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
-
-export const NavigationBar = () => {
+interface NavBarProps {
+  beShown: boolean;
+}
+export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
+  if (beShown === false) {
+    return (
+      <div>
+        <Nav
+          header={{
+            logo: <img src={AIIcon} />,
+            text: "AI模型大PK",
+          }}
+          mode={"horizontal"}
+        />
+        <Outlet />
+      </div>
+    );
+  }
   return (
     <div>
       <Nav

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { LoginButton } from "../../login/LoginButton/LoginButton";
+import { any } from "prop-types";
 
 const meta = {
   title: "Login/LoginButton",
@@ -12,5 +13,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {
-  args: {},
+  args: {
+    disabled: true,
+    password: "test",
+    account: "test",
+    onLogin(status) {
+      console.log("test");
+    },
+  },
 };
