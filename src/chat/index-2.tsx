@@ -1,5 +1,5 @@
-import { Avatar, Button, Input, List } from "@douyinfe/semi-ui";
-import { useState, useEffect, useRef } from "react";
+import { Avatar, Button, Input } from "@douyinfe/semi-ui";
+import { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";

@@ -1,5 +1,5 @@
-import { Avatar, Button, Input, List } from "@douyinfe/semi-ui";
-import { useState, useEffect, useRef } from "react";
+import { Avatar, Button, Input } from "@douyinfe/semi-ui";
+import { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
@@ -65,17 +65,18 @@ export const Chat = () => {
   const [buttonContent, setButtonContent] = useState("发送");
   const isSendingRef = useRef(isSending); // 创建一个ref来跟踪isSending的值
   const MAX_DATA = 30;
-  const hasMore = chatHistory.length < MAX_DATA;
   const canAutoScrollRef = useRef(true);
   const chatHistoryLength = useRef(chatHistory.length);
+  const [moreChatHistory, setMoreChatHistory] = useState<ChatMessage[]>([]);
+  const hasMore = moreChatHistory.length < MAX_DATA;
 
   function fetchData() {
     canAutoScrollRef.current = false;
-    let newData = [...chatHistory];
+    let newData = [...moreChatHistory];
     axios.get("https://mock/1").then((res) => {
       console.log(res);
       newData = [...res.data, ...newData];
-      setTimeout(() => setChatHistory([...res.data, ...chatHistory]), 1500);
+      setTimeout(() => setMoreChatHistory(newData), 1500);
     });
     // fake delay to simulate a time-consuming network request
   }
@@ -224,7 +225,7 @@ export const Chat = () => {
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll
             endMessage={"没有更多数据了"}
-            dataLength={chatHistoryLength.current}
+            dataLength={moreChatHistory.length}
             scrollableTarget={"chat-history-list"}
             loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
             inverse={true}
@@ -239,15 +240,22 @@ export const Chat = () => {
           >
             <div ref={bottomRef} />
             <div className={"chat-history-list-content"}>
-              {chatHistory
-                .sort((a, b) => b.id - a.id)
-                .map((record) => {
+              <div className={"more-chat-history"}>
+                {moreChatHistory.map((record) => {
                   if (record.type === "query") {
                     return <UserQuery query={record.content} />;
                   } else {
                     return <BotReply reply={record.content} />;
                   }
                 })}
+              </div>
+              {chatHistory.map((record) => {
+                if (record.type === "query") {
+                  return <UserQuery query={record.content} />;
+                } else {
+                  return <BotReply reply={record.content} />;
+                }
+              })}
             </div>
           </InfiniteScroll>
         </div>
@@ -270,7 +278,7 @@ export const Chat = () => {
                   {
                     content: userInput,
                     type: "query",
-                    id: chatHistoryLength.current + 1,
+                    id: chatHistoryLength.current,
                   },
                 ]);
                 setUserInput("");
