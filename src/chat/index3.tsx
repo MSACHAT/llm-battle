@@ -49,7 +49,7 @@ const Content: FC = () => {
 
   const sendTextChatMessages = async (content: string) => {
     // temp stream message
-    let tempMessage = "";
+    const tempMessage = "";
     console.log(tempMessage, 11111);
     const input: Message[] = [
       {
@@ -66,68 +66,102 @@ const Content: FC = () => {
     try {
       const abortController = new AbortController();
       setController(abortController);
-      const res = await fetch("https://api.coze.com/open_api/v2/chat", {
-        headers: {
-          Authorization:
-            "Bearer pat_4F9lbr5UTmXpGJClGfa6HylNSSIFkKdbJu4cUwr2mr8cPcV5wk8IpOvI94xG0oNm",
-          "Content-Type": "application/json",
-          Accept: "*/*",
-          Host: "api.coze.com",
-          Connection: "keep-alive",
+      const res = await fetch(
+        "http://172.10.21.42:8087/api/conversation/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            Host: "api.coze.com",
+            Connection: "keep-alive",
+          },
+          body: JSON.stringify({
+            content_type: "text",
+            conversation_id: "1",
+            query: content,
+          }),
+          signal: abortController.signal,
         },
-        method: "POST",
-        body: JSON.stringify({
-          conversation_id: "123",
-          bot_id: "7372104038311739410",
-          user: "29032201862555",
-          query: content,
-          stream: true,
-        }),
-        signal: abortController.signal,
-      });
+      );
 
       const stream = res.body;
+
       const reader = stream?.getReader();
+
+      let tempMessage = "";
       const decoder = new TextDecoder();
+      let shouldBreak = false; // 标志位
+
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        console.log("Starting loop iteration");
         const { value, done } = await reader!.read();
+
+        if (value) {
+          const decodedValue = decoder.decode(value);
+          console.log("Decoded value:", decodedValue);
+
+          // 分割和处理数据包
+          const dataPackets = decodedValue
+            .split("\ndata:")
+            .map((packet) => packet.trim())
+            .filter((packet) => packet);
+
+          dataPackets.forEach((packet) => {
+            if (shouldBreak) return; // 如果标志位为真，退出 forEach 循环
+
+            console.log("Raw packet:", packet);
+
+            try {
+              // 如果数据包前面有 'data:' 前缀，去掉它
+              const jsonString = packet.startsWith("data:")
+                ? packet.slice(5).trim()
+                : packet.trim();
+              const obj = JSON.parse(jsonString);
+              console.log("Parsed object:", obj);
+
+              if (obj.is_finish) {
+                console.log("Received is_finish, setting shouldBreak to true");
+                shouldBreak = true; // 设置标志位为真
+                return; // 退出 forEach 循环
+              }
+
+              if (obj.message.content) {
+                tempMessage += obj.message.content;
+                console.log("Updated tempMessage:", tempMessage);
+                setStreamMessage(tempMessage);
+              }
+            } catch (error) {
+              console.error(
+                "JSON parsing error:",
+                error,
+                "Packet causing error:",
+                packet,
+              );
+            }
+          });
+
+          if (shouldBreak) break; // 如果标志位为真，退出 while 循环
+        }
+
         if (done) {
+          console.log("Done reading, breaking loop");
           break;
         }
-        if (value) {
-          console.log(decoder.decode(value), tempMessage);
-          const jsonString = decoder
-            .decode(value)
-            .replace(/^data:/, "")
-            .trim();
-          const obj = JSON.parse(jsonString);
-          if (obj.is_finish) {
-            break;
-          }
-          if (obj.message.content && !obj.is_finish) {
-            tempMessage += obj.message.content;
-            console.log(tempMessage, 22222);
-            // eslint-disable-next-line no-loop-func
-            setStreamMessage(tempMessage);
-          }
-        }
       }
+
       const now = Date.now();
       const newMessage = {
         content: tempMessage,
         createdAt: now,
         id: messages.length,
       };
-
-      console.log(newMessage);
+      console.log("over");
       setMessages((prevMessages) => {
-        const updatedMessage = {
-          ...newMessage,
-          type: "reply",
-          id: prevMessages.length,
-        };
-        return prevMessages.concat([updatedMessage]);
+        return prevMessages.concat([
+          { ...newMessage, type: "reply", id: prevMessages.length },
+        ]);
       });
       setStreamMessage("");
       tempMessage = "";

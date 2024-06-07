@@ -10,6 +10,7 @@ import { Battle } from "@/battle";
 import { LeaderBoard } from "@/leaderBoard";
 import { NavigationBar } from "@/component/base";
 import { Chat } from "@/chat";
+import Content from "@/chat/index3";
 
 function App() {
   const body = document.body;
@@ -20,7 +21,7 @@ function App() {
       <Route path="/" element={<NavigationBar />}>
         <Route path="battle" element={<Battle />} />
         <Route path="leaderBoard" element={<LeaderBoard />} />
-        <Route path="chat" element={<Chat />} />
+        <Route path="chat" element={<Content />} />
       </Route>,
     ),
   );
