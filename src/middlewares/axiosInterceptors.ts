@@ -8,8 +8,7 @@ const apiClient = axios.create({
 });
 apiClient.interceptors.request.use((config) => {
   // eslint-disable-next-line no-undef
-  const token =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NjYxYTgxMDdmYzZhYjBkMzhhZWZhZjkifQ.chAygeU7hOVE-PKdnJCUse_K20RY8jsPrYLJI1qfCUc";
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";

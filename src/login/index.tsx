@@ -1,4 +1,4 @@
-import { Input, Spin } from "@douyinfe/semi-ui";
+import { Input, Spin, Toast } from "@douyinfe/semi-ui";
 import { Typography } from "@douyinfe/semi-ui";
 import { Button, SplitButtonGroup } from "@douyinfe/semi-ui";
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
@@ -6,23 +6,37 @@ import { useNavigate } from "react-router-dom";
 import "./index.scss";
 import { Divider } from "@douyinfe/semi-ui";
 import { LoginButton } from "./LoginButton/LoginButton";
+import { changePwdToUuid } from "@/middlewares/uuidMiddleWare";
+import axios from "axios";
+import config from "@/config/config";
 
 export const Login = () => {
   const navigate = useNavigate();
-  const [account, setAccount] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [passwd, setPasswd] = useState<string>("");
   const [loginResult, setLoginResult] = useState<boolean | null>(null);
 
-  const handleLogin = (status: boolean) => {
-    setLoginResult(status);
-  };
-
-  const LoginAction = (account: string, passwd: string) => {
-    const body = {
-      username: account,
+  const handleLogin = async (status: boolean) => {
+    const data = {
+      username,
       password: passwd,
     };
+    try {
+      const res = await axios.post(config.apiUrl + "/user/login", data);
+      if (res && res.data) {
+        Toast.success("登录成功");
+        console.log(res);
+        localStorage.setItem("token", res.data);
+        navigate("feed");
+        setLoginResult(true);
+      } else {
+        setLoginResult(false);
+      }
+    } catch (error) {
+      setLoginResult(false);
+    }
   };
+
   return (
     <div className={"root"}>
       <div className={"Logo"}>
@@ -36,7 +50,7 @@ export const Login = () => {
           <Input
             placeholder={"请输入账号"}
             onChange={(value: string) => {
-              setAccount(value);
+              setUsername(value);
             }}
           />
           <Input
@@ -55,8 +69,8 @@ export const Login = () => {
         <div className={"login_button_footer"}>
           <div>
             <LoginButton
-              disabled={!passwd || !account}
-              account={account}
+              disabled={!passwd || !username}
+              account={username}
               password={passwd}
               onLogin={handleLogin}
             />
@@ -65,7 +79,7 @@ export const Login = () => {
             <Typography.Text>
               如果没有账号点击这里
               <Typography.Text
-                link={{ href: "http://localhost:3000/register" }}
+                link={{ href: "http://172.10.21.42:8087/register" }}
               >
                 注册
               </Typography.Text>
