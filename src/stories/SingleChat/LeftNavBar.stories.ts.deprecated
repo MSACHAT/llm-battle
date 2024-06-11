@@ -1,0 +1,72 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { LeftNavBar } from "../../singleChat/LeftNavBar/LeftNavBar";
+
+const meta = {
+  title: "SingleChat/LeftNavigatorBar",
+  component: LeftNavBar,
+  parameters: {
+    layout: "fullscreen",
+  },
+} satisfies Meta<typeof LeftNavBar>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Empty: Story = {
+  args: {
+    chats: [],
+    chosenChatId: "",
+  },
+};
+
+export const OneChatBlock: Story = {
+  args: {
+    chats: [
+      {
+        conversation_id: "1",
+        title: "Hello",
+        bot_name: "GPT-4",
+        last_message_time: 12391239,
+      },
+    ],
+    chosenChatId: "1",
+  },
+};
+
+export const ManyChatBlocks: Story = {
+  args: {
+    chats: [
+      {
+        conversation_id: "1",
+        title: "Hello",
+        bot_name: "GPT-4",
+        last_message_time: 12391239,
+      },
+      {
+        conversation_id: "2",
+        title: "Hello",
+        bot_name: "GPT-5",
+        last_message_time: 12391239,
+      },
+      {
+        conversation_id: "3",
+        title: "Hello",
+        bot_name: "GPT-6",
+        last_message_time: 12391239,
+      },
+      {
+        conversation_id: "4",
+        title: "Hello",
+        bot_name: "GPT-7",
+        last_message_time: 12391239,
+      },
+      {
+        conversation_id: "5",
+        title: "Hello",
+        bot_name: "GPT-8",
+        last_message_time: 12391239,
+      },
+    ],
+    chosenChatId: "5",
+  },
+};

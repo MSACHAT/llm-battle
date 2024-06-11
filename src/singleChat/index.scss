@@ -114,7 +114,7 @@
   display: none;
 }
 
-.chat-history-list-content {
+.more-chat-history {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
 }

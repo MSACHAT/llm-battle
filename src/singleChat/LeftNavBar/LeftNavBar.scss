@@ -13,11 +13,27 @@
     color: rgb(249, 249, 249);
 
     .icon-and-title, .operations {
+      .title {
+        max-width: 8vw;
+        overflow: scroll;
+        background-color: transparent;
+      }
+
+      //.semi-input{
+      //  padding:0;
+      //}
+      //.semi-input-disabled{
+      //  color:white !important;
+      //  cursor: default;
+      //}
+      //.semi-input-wrapper-disabled{
+      //  -webkit-text-fill-color: white;
+      //}
       display: flex;
       align-items: baseline;
       font-size: 22px;
       line-height: 22px;
-
+      gap: 0.5vw;
       .comment-icon {
         margin-left: 18px;
         margin-right: 18px;
@@ -28,7 +44,10 @@
       }
 
       .rubbish-bin-icon, .pencil-icon {
-
+        height: 2.5vh;
+        width: 1.1vw;
+        background-color: transparent;
+        border: none;
       }
     }
   }

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { NewChatButton } from "../../chat/LeftNavBar/LeftNavBar";
+import { NewChatButton } from "../../singleChat/LeftNavBar/LeftNavBar";
 
 const meta = {
   title: "SingleChat/NewChatButton",

@@ -1,13 +1,16 @@
 import { Avatar, Button, Input } from "@douyinfe/semi-ui";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { LeftNavBar } from "./LeftNavBar/LeftNavBar";
+import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import axios from "axios";
+import { model, ModelSelector } from "./ModelSelector/index";
+import { useNavigate } from "react-router";
 
 type ChatMessage = {
   content: string;
   type: "reply" | "query";
+  id: number;
 };
 
 const BotReply = ({ reply }: { reply: string }) => {
@@ -35,71 +38,86 @@ const UserQuery = ({ query }: { query: string }) => {
   );
 };
 
-export const Chat = () => {
-  const fakeData: ChatMessage[] = [
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test1", type: "reply" },
-    { content: "test1", type: "query" },
-    { content: "test2", type: "reply" },
-  ];
+export const HandleClickOnChatBlockContext = React.createContext(
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  (conversation_id: string) => {},
+);
+export const StartNewChatContext = React.createContext(
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  () => {},
+);
+export const SingleChat = () => {
   const [userInput, setUserInput] = useState("");
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<number | null>(null);
   const [buttonContent, setButtonContent] = useState("发送");
   const isSendingRef = useRef(isSending); // 创建一个ref来跟踪isSending的值
   const MAX_DATA = 30;
-  const hasMore = chatHistory.length < MAX_DATA;
   const canAutoScrollRef = useRef(true);
+  const chatHistoryLength = useRef(chatHistory.length);
+  const [moreChatHistory, setMoreChatHistory] = useState<ChatMessage[]>([]);
+  const hasMore = moreChatHistory.length < MAX_DATA;
+  const chats = useRef<Chat[]>([]);
+  const models = useRef<model[]>([]);
+  const isNewChat = useRef(false);
+  // useEffect(() => {
+  //   apiClient.get("GET CHATS").then((res) => {
+  //     chats.current = res.data;
+  //   });
+  //   if (chats.current.length === 0) {
+  //     apiClient.get("GET MODELS").then((res) => {
+  //       models.current = res.data;
+  //     });
+  //   }
+  // }, []);
+
+  function handleClickOnChatBlock(conversation_id: string) {
+    console.log("NAVIGATING!");
+    const navigate = useNavigate();
+    navigate(`/singleChat?conversation_id=\`${conversation_id}\``);
+  }
+
+  function startNewChat() {
+    setChatHistory([]);
+    setUserInput("");
+    setIsSending(false);
+  }
 
   function fetchData() {
     canAutoScrollRef.current = false;
-    let newData = [...chatHistory];
+    let newData = [...moreChatHistory];
     axios.get("https://mock/1").then((res) => {
       console.log(res);
       newData = [...res.data, ...newData];
+      setTimeout(() => setMoreChatHistory(newData), 1500);
     });
     // fake delay to simulate a time-consuming network request
-    setTimeout(() => setChatHistory(newData), 1500);
   }
 
   const query = async (msg: string) => {
     try {
       setIsSending(true);
       setButtonContent("终止");
-      const res = await fetch("https://api.coze.com/open_api/v2/chat", {
-        headers: {
-          Authorization:
-            "Bearer pat_9qv4hQgwIGqJLxeqX7b0D0v7L8St7qHa4U0pvDxMblA4LzIO7ORkq135sSB2DGUt",
-          "Content-Type": "application/json",
-          Accept: "*/*",
-          Host: "api.coze.com",
-          Connection: "keep-alive",
+      const res = await fetch(
+        "http://172.10.21.42:8087/api/conversation/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            Host: "api.coze.com",
+            Connection: "keep-alive",
+          },
+          body: JSON.stringify({
+            content_type: "text",
+            conversation_id: "1",
+            query: msg,
+          }),
         },
-        method: "POST",
-        body: JSON.stringify({
-          conversation_id: "123",
-          bot_id: "7372104038311739410",
-          user: "29032201862555",
-          query: msg,
-          stream: true,
-        }),
-      });
+      );
+
       if (!res.ok) {
         return new Response(res.body, {
           status: res.status,
@@ -127,7 +145,6 @@ export const Chat = () => {
             if (done) break;
             const str = decoder.decode(value).slice(5);
             const obj = JSON.parse(str);
-            console.log(obj.is_finish);
             if (!obj.is_finish) {
               const chunk = obj.message.content;
               currentReply += chunk;
@@ -141,18 +158,24 @@ export const Chat = () => {
                 } else {
                   return [
                     ...prevHistory,
-                    { content: currentReply, type: "reply" },
+                    {
+                      content: currentReply,
+                      type: "reply",
+                      id: chatHistoryLength.current + 1,
+                    },
                   ];
                 }
               });
-              if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = window.setTimeout(() => {
-                  setIsSending(false);
-                  setButtonContent("发送");
-                }, 5000);
-              }
+              // if (timeoutRef.current) {
+              //   chatHistoryLength.current += 1;
+              //   clearTimeout(timeoutRef.current);
+              //   timeoutRef.current = window.setTimeout(() => {
+              //     setIsSending(false);
+              //     setButtonContent("发送");
+              //   }, 5000);
+              // }
             } else {
+              chatHistoryLength.current += 1;
               // setChatHistory((prevHistory) => [
               //   ...prevHistory,
               //   { content: currentReply, type: "reply" },
@@ -164,6 +187,7 @@ export const Chat = () => {
               break;
             }
           }
+          console.log("CLOSED!");
           controller.close();
         },
       });
@@ -203,20 +227,24 @@ export const Chat = () => {
   }, []); // 空数组表示这个effect没有依赖项，因此不会重新执行
   return (
     <div className={"single-chat"}>
-      <LeftNavBar
-        chats={[
-          {
-            chatModel: "gpt-4",
-            chatTitle: "welcome",
-            chosen: true,
-          },
-        ]}
-      />
+      {isNewChat.current ? <ModelSelector /> : <></>}
+      <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
+        <StartNewChatContext.Provider value={startNewChat}>
+          <LeftNavBar
+            chats={chats.current}
+            chosenChatId={
+              chats.current
+                .sort((a, b) => b.last_message_time - a.last_message_time)
+                .at(0)?.conversation_id
+            }
+          />
+        </StartNewChatContext.Provider>
+      </HandleClickOnChatBlockContext.Provider>
       <div className={"single-chat-content"}>
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll
             endMessage={"没有更多数据了"}
-            dataLength={chatHistory.length}
+            dataLength={moreChatHistory.length}
             scrollableTarget={"chat-history-list"}
             loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
             inverse={true}
@@ -231,6 +259,15 @@ export const Chat = () => {
           >
             <div ref={bottomRef} />
             <div className={"chat-history-list-content"}>
+              <div className={"more-chat-history"}>
+                {moreChatHistory.map((record) => {
+                  if (record.type === "query") {
+                    return <UserQuery query={record.content} />;
+                  } else {
+                    return <BotReply reply={record.content} />;
+                  }
+                })}
+              </div>
               {chatHistory.map((record) => {
                 if (record.type === "query") {
                   return <UserQuery query={record.content} />;
@@ -254,9 +291,14 @@ export const Chat = () => {
             onClick={() => {
               if (!isSending) {
                 canAutoScrollRef.current = true;
+                chatHistoryLength.current += 1;
                 setChatHistory((prevHistory) => [
                   ...prevHistory,
-                  { content: userInput, type: "query" },
+                  {
+                    content: userInput,
+                    type: "query",
+                    id: chatHistoryLength.current,
+                  },
                 ]);
                 setUserInput("");
                 query(userInput);

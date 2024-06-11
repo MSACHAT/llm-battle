@@ -18,7 +18,7 @@ export const NavigationBar = () => {
           const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
-            chat: "/chat",
+            chat: "/singleChat",
           };
           const itemKey = props.itemKey as NavItemKey;
           return (

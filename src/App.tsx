@@ -6,10 +6,10 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import { Battle } from "@/battle";
-import { LeaderBoard } from "@/leaderBoard";
-import { NavigationBar } from "@/component/base";
-import { Chat } from "@/chat";
+import { Battle } from "./battle/index";
+import { LeaderBoard } from "./leaderBoard/index";
+import { NavigationBar } from "./component/base";
+import { SingleChat } from "src/singleChat";
 
 function App() {
   const body = document.body;
@@ -20,7 +20,7 @@ function App() {
       <Route path="/" element={<NavigationBar />}>
         <Route path="battle" element={<Battle />} />
         <Route path="leaderBoard" element={<LeaderBoard />} />
-        <Route path="chat" element={<Chat />} />
+        <Route path="singleChat" element={<SingleChat />} />
       </Route>,
     ),
   );
