@@ -227,56 +227,56 @@ export const SingleChat = () => {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const decodedValue = decoder.decode(value);
-
+            const decodedValue = decoder.decode(value, { stream: true });
+            console.log(decodedValue);
+            // 处理拆分数据包，确保每个数据包都完整处理
             const dataPackets = decodedValue
               .split("\ndata:")
               .map((packet) => packet.trim())
               .filter((packet) => packet);
 
             dataPackets.forEach((packet) => {
-              if (packet === "data:") return; // Handle empty packets
+              try {
+                const jsonString = packet.startsWith("data:")
+                  ? packet.slice(5).trim()
+                  : packet;
+                const obj = JSON.parse(jsonString);
 
-              if (packet.startsWith("data:")) {
-                const jsonString = packet.slice(5).trim();
-                try {
-                  const obj = JSON.parse(jsonString);
-                  if (!obj.is_finish) {
-                    currentReply += obj.message.content;
-                    setChatHistory((prevHistory) => {
-                      const updatedHistory = [...prevHistory];
-                      const lastMessage =
-                        updatedHistory[updatedHistory.length - 1];
-                      if (lastMessage && lastMessage.role === "bot") {
-                        updatedHistory[updatedHistory.length - 1] = {
-                          ...lastMessage,
-                          content: currentReply,
-                        };
-                      } else {
-                        updatedHistory.push({
-                          content_type: "",
-                          message_id: "0",
-                          content: currentReply,
-                          role: "bot",
-                        });
-                      }
-                      return updatedHistory;
-                    });
-                  } else {
-                    clearTimeout(timeoutRef.current!);
-                    setIsSending(false);
-                    setButtonContent("发送");
-                    controller.close();
-                    return;
-                  }
-                } catch (error) {
-                  console.error(
-                    "JSON parsing error:",
-                    error,
-                    "Packet causing error:",
-                    packet,
-                  );
+                if (!obj.is_finish) {
+                  currentReply += obj.message.content;
+                  setChatHistory((prevHistory) => {
+                    const updatedHistory = [...prevHistory];
+                    const lastMessage =
+                      updatedHistory[updatedHistory.length - 1];
+                    if (lastMessage && lastMessage.role === "bot") {
+                      updatedHistory[updatedHistory.length - 1] = {
+                        ...lastMessage,
+                        content: currentReply,
+                      };
+                    } else {
+                      updatedHistory.push({
+                        content_type: "",
+                        message_id: "0",
+                        content: currentReply,
+                        role: "bot",
+                      });
+                    }
+                    return updatedHistory;
+                  });
+                } else {
+                  clearTimeout(timeoutRef.current!);
+                  setIsSending(false);
+                  setButtonContent("发送");
+                  controller.close();
+                  return;
                 }
+              } catch (error) {
+                console.error(
+                  "JSON parsing error:",
+                  error,
+                  "Packet causing error:",
+                  packet,
+                );
               }
             });
           }
@@ -331,7 +331,7 @@ export const SingleChat = () => {
       <div className={"single-chat-content"}>
         <div style={{ alignSelf: "center" }}>
           {" "}
-          {isNewChat.current ? <ModelSelector /> : <></>}
+          {isNewChat.current || chats.length === 0 ? <ModelSelector /> : <></>}
         </div>
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll

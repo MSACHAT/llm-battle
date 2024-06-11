@@ -1,6 +1,6 @@
 import { Select } from "@douyinfe/semi-ui";
 import apiClient from "@/middlewares/axiosInterceptors";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type model = {
   model_id: string;
