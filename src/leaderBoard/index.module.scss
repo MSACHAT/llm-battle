@@ -1,0 +1,38 @@
+body{
+  background: #1C1E29;
+}
+.leaderBoard {
+  padding: 56px 140px;
+  height: 80vh; // 占据整个视口高度
+  overflow-y: auto;
+}
+.title{
+  color: #F9F9F9;
+}
+.Classification{
+  display: flex;
+  flex-direction: column;
+}
+.option{
+  display: flex;
+  gap: 34px;
+}
+.select{
+  height: 54px;
+  width: 464px;
+  border: 1px solid var(--color-select-border-focus, #FFD66F);
+  border-radius: var(--radius-select, 12px);
+  background: rgba(255, 255, 255, 0.05);
+  color: #F9F9F9;
+  margin-bottom: 29px;
+}
+.text{
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 12px;
+  color: #F9F9F9;
+}
+.scrollableContainer {
+  border-radius: 10px;
+}
