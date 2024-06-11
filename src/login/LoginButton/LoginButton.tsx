@@ -1,5 +1,5 @@
 import { Avatar, Button, Input, List } from "@douyinfe/semi-ui";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ReactNode } from "react";
 import "./LoginButton.scss";
 
 interface LoginButtonProps {
@@ -7,6 +7,7 @@ interface LoginButtonProps {
   account: string;
   password: string;
   onLogin: (status: boolean) => void;
+  children: ReactNode;
 }
 
 export const LoginButton: React.FC<LoginButtonProps> = ({
@@ -14,6 +15,7 @@ export const LoginButton: React.FC<LoginButtonProps> = ({
   account,
   password,
   onLogin,
+  children,
 }) => {
   const [loginStatus, setLoginStatus] = useState<string | null>(null);
 
@@ -52,7 +54,7 @@ export const LoginButton: React.FC<LoginButtonProps> = ({
           loginAction(account, password);
         }}
       >
-        登录
+        {children}
       </Button>
     </>
   );

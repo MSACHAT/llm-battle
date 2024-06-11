@@ -25,6 +25,7 @@ function App() {
         </Route>
         <Route path="/" element={<NavigationBar beShown={false} />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Login isRegister={true} />} />
         </Route>
       </>,
     ),

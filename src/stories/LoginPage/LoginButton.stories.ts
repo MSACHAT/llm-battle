@@ -20,5 +20,6 @@ export const Default: Story = {
     onLogin(status) {
       console.log("test");
     },
+    children: "登录",
   },
 };

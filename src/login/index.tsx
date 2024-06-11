@@ -1,17 +1,16 @@
 import { Input, Spin, Toast } from "@douyinfe/semi-ui";
 import { Typography } from "@douyinfe/semi-ui";
-import { Button, SplitButtonGroup } from "@douyinfe/semi-ui";
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
 import { Divider } from "@douyinfe/semi-ui";
-import { LoginButton } from "./LoginButton/LoginButton";
-import { changePwdToUuid } from "@/middlewares/uuidMiddleWare";
 import axios from "axios";
 import config from "@/config/config";
+import { LoginButton } from "@/login/LoginButton/LoginButton";
 
-export const Login = () => {
+export const Login = ({ isRegister: isRegisterOrigin = false }) => {
   const navigate = useNavigate();
+  const [isRegister, setIsregister] = useState(isRegisterOrigin);
   const [username, setUsername] = useState<string>("");
   const [passwd, setPasswd] = useState<string>("");
   const [loginResult, setLoginResult] = useState<boolean | null>(null);
@@ -21,19 +20,27 @@ export const Login = () => {
       username,
       password: passwd,
     };
-    try {
-      const res = await axios.post(config.apiUrl + "/user/login", data);
+    if (isRegister) {
+      const res = await axios.post(config.apiUrl + "/user/register", data);
       if (res && res.data) {
-        Toast.success("登录成功");
-        console.log(res);
-        localStorage.setItem("token", res.data);
-        navigate("feed");
-        setLoginResult(true);
+        Toast.success("注册成功");
       } else {
+        Toast.error("注册失败，请重试");
+      }
+    } else {
+      try {
+        const res = await axios.post(config.apiUrl + "/user/login", data);
+        if (res && res.data) {
+          !isRegister && Toast.success("登录成功");
+          localStorage.setItem("token", res.data);
+          navigate("feed");
+          setLoginResult(true);
+        } else {
+          setLoginResult(false);
+        }
+      } catch (error) {
         setLoginResult(false);
       }
-    } catch (error) {
-      setLoginResult(false);
     }
   };
 
@@ -73,18 +80,25 @@ export const Login = () => {
               account={username}
               password={passwd}
               onLogin={handleLogin}
-            />
+            >
+              {isRegister ? "注册" : "登录"}
+            </LoginButton>
           </div>
-          <div>
-            <Typography.Text>
-              如果没有账号点击这里
-              <Typography.Text
-                link={{ href: "http://172.10.21.42:8087/register" }}
-              >
-                注册
+          {!isRegister && (
+            <div>
+              <Typography.Text>
+                如果没有账号点击这里
+                <Typography.Text
+                  link
+                  onClick={() => {
+                    setIsregister(true);
+                  }}
+                >
+                  注册
+                </Typography.Text>
               </Typography.Text>
-            </Typography.Text>
-          </div>
+            </div>
+          )}
         </div>
         <Divider className="line" />
       </div>
