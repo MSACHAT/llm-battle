@@ -113,7 +113,6 @@ export const Battle = () => {
             .split("\ndata:")
             .map((packet) => packet.trim())
             .filter((packet) => packet);
-
           dataPackets.forEach((packet) => {
             if (shouldBreak) return; // 如果标志位为真，退出 forEach 循环
 
@@ -125,23 +124,17 @@ export const Battle = () => {
                 ? packet.slice(5).trim()
                 : packet.trim();
               const obj = JSON.parse(jsonString);
-              console.log(
-                "Parsed object:",
-                obj,
-                obj.event === "done",
-                !oneFinish,
-              );
               if (obj.event === "done") {
                 shouldBreak = true;
                 return;
               }
-              if (obj.message.content && obj.message.model === "model_a") {
+              if (obj.message.content && obj.model === "model_a") {
                 tempMessage1 += obj.message.content;
-                console.log("Updated tempMessage:", tempMessage1);
+                console.log("Updated tempMessage1:", tempMessage1);
                 setStreamMessage_1(tempMessage1);
               } else {
                 tempMessage2 += obj.message.content;
-                console.log("Updated tempMessage:", tempMessage2);
+                console.log("Updated tempMessage2:", tempMessage2);
                 setStreamMessage_2(tempMessage2);
               }
             } catch (error) {
