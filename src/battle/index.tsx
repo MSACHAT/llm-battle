@@ -1,7 +1,7 @@
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
 import { BattleComponent } from "./components/BattleComponent";
-import { Button, Input, Space } from "@douyinfe/semi-ui";
+import { Button, Input, Space, Spin } from "@douyinfe/semi-ui";
 import { useState } from "react";
 import { Message } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
@@ -11,6 +11,7 @@ export const Battle = () => {
   const [streamMessage, setStreamMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [newRoundLoading, setNewRoungLoading] = useState(false);
   const stopGenerate = () => {
     controller?.abort?.();
     if (streamMessage) {
@@ -29,10 +30,12 @@ export const Battle = () => {
   };
   const newRound = async () => {
     stopGenerate();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    setNewRoungLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     setController(null);
     setStreamMessage("");
     setMessages([]);
+    setNewRoungLoading(false);
   };
 
   const sendTextChatMessages = async (content: string) => {
@@ -191,6 +194,7 @@ export const Battle = () => {
     <div className={"battle-page"}>
       <Title heading={4}>开始对战</Title>
       <div className={"battles"}>
+        {newRoundLoading && <Spin />}
         <BattleComponent
           messages={messages}
           streamMessage={streamMessage}
@@ -220,7 +224,11 @@ export const Battle = () => {
           sendTextChatMessages(text);
         }}
       />
-      <Button onClick={newRound}>新一轮</Button>
+      <div className={"new-round"}>
+        <Button theme="solid" onClick={newRound}>
+          开始新一轮
+        </Button>
+      </div>
     </div>
   );
 };

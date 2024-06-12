@@ -61,4 +61,13 @@
   .semi-input-wrapper {
     margin-top: 40px;
   }
+  .new-round {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 28px;
+    .semi-button {
+      width:383px;
+    }
+  }
 }
