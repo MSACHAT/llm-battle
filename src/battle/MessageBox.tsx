@@ -1,19 +1,31 @@
-import { FC, useCallback, useEffect } from "react";
-import { throttle } from "lodash-es";
+import { FC, useEffect, useRef } from "react";
 import { Message } from "@/interface";
-import { Avatar } from "@douyinfe/semi-ui";
-// import "./index.scss";
+import "../singleChat/index.scss";
+import { Spin } from "@douyinfe/semi-ui";
 
-const BotReply = ({ content }: { content: string }) => {
+const BlinkingCursor: React.FC = () => {
+  return <div className="cursor"></div>;
+};
+
+const BotReply = ({
+  content,
+  loading = false,
+}: {
+  content: string;
+  loading?: boolean;
+}) => {
   return (
     <div className={"bot-reply"}>
-      <Avatar
-        size="medium"
-        alt="Bot"
-        src={"/bot_avatar.png"}
-        className={"bot-avatar"}
-      />
-      <div className={"bot-chat-bubble"}>{content}</div>
+      <div className={"bot-chat-bubble"}>
+        {loading && !content ? (
+          <Spin size={"middle"} style={{ marginBottom: -8 }} />
+        ) : (
+          <>
+            {content}
+            {loading ? <BlinkingCursor /> : ""}
+          </>
+        )}
+      </div>
     </div>
   );
 };
@@ -22,9 +34,6 @@ const UserQuery = ({ content }: { content: string }) => {
   return (
     <div className={"user-query"}>
       <div className={"user-chat-bubble"}>{content}</div>
-      <Avatar size="medium" alt="User" className={"user-avatar"}>
-        YD
-      </Avatar>
     </div>
   );
 };
@@ -35,41 +44,38 @@ const MessageBox: FC<{
   loading: boolean;
   title: string;
 }> = ({ streamMessage, messages, loading, title }) => {
-  const handleAutoScroll = useCallback(
-    throttle(() => {
-      const element = document.querySelector("#content" + title);
-      element!.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }, 300),
-    [],
-  );
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    }
+  };
 
   useEffect(() => {
-    handleAutoScroll();
-  }, [streamMessage]);
+    scrollToBottom();
+  }, [streamMessage, messages]);
 
-  useEffect(() => {
-    const clock = setTimeout(() => {
-      handleAutoScroll();
-    }, 300);
-
-    return () => {
-      clearTimeout(clock);
-    };
-  }, [messages]);
   return (
-    <div id={"content" + title}>
-      {messages.map((message, index) => {
-        if (message.type === "query") {
-          return <UserQuery key={index} content={message.content} />;
-        } else {
-          return <BotReply key={index} content={message.content} />;
-        }
-      })}
-      {streamMessage ? <BotReply content={streamMessage} /> : null}
-      {loading ? <div>Loading...</div> : null}
+    <div
+      id={"content" + title}
+      ref={contentRef}
+      style={{ overflowY: "auto", maxHeight: "100%" }}
+    >
+      {messages.map((message, index) => (
+        <div key={index} className="message-container">
+          {message.type === "query" ? (
+            <UserQuery content={message.content} />
+          ) : (
+            <BotReply content={message.content} />
+          )}
+        </div>
+      ))}
+      {streamMessage || loading ? (
+        <div className="message-container">
+          <BotReply content={streamMessage} loading={loading} />
+        </div>
+      ) : null}
     </div>
   );
 };

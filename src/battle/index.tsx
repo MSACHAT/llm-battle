@@ -139,7 +139,6 @@ export const Battle = () => {
         createdAt: now,
         id: messages.length,
       };
-      console.log("over");
       setMessages((prevMessages) => {
         return prevMessages.concat([
           { ...newMessage, type: "reply", id: prevMessages.length },
@@ -198,6 +197,9 @@ export const Battle = () => {
       </div>
       <Input
         autoFocus
+        placeholder={
+          "在这里输入问题，按Enter发送，你会得到AB模型的不同答案并可以为它们投票"
+        }
         value={text}
         onChange={(v) => setText(v)}
         onEnterPress={async () => {
@@ -205,7 +207,6 @@ export const Battle = () => {
           await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
           sendTextChatMessages(text);
         }}
-        // onCancel={stopGenerate}
       />
     </div>
   );

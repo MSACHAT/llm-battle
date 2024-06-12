@@ -18,6 +18,7 @@
 
   .bot-avatar {
     background-color: rgb(250, 233, 166);
+    flex-shrink: 0;
 
     img {
       width: 62.5%;
@@ -47,6 +48,7 @@
   .user-avatar {
     color: rgb(245, 201, 80);
     background-color: rgb(90, 92, 112);
+    flex-shrink: 0;
   }
 }
 
