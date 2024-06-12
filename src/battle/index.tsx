@@ -2,72 +2,69 @@ import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
 import { BattleComponent } from "./components/BattleComponent";
 import { Button, Input, Space, Spin } from "@douyinfe/semi-ui";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Message } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
+
 export const Battle = () => {
   const [text, setText] = useState("");
   const [controller, setController] = useState<any>(null);
-  const [streamMessage_1, setStreamMessage_1] = useState("");
-  const [streamMessage_2, setStreamMessage_2] = useState("");
+  const [streamMessages, setStreamMessages] = useState<{
+    [key: string]: string;
+  }>({
+    model_a: "",
+    model_b: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [messages_1, setMessages_1] = useState<Message[]>([]);
-  const [messages_2, setMessages_2] = useState<Message[]>([]);
-  const [newRoundLoading, setNewRoungLoading] = useState(false);
-  const stopGenerate = () => {
+  const [messages, setMessages] = useState<{ [key: string]: Message[] }>({
+    model_a: [],
+    model_b: [],
+  });
+  const [newRoundLoading, setNewRoundLoading] = useState(false);
+
+  const stopGenerate = useCallback(() => {
     controller?.abort?.();
-    if (streamMessage_1) {
-      setMessages_1((msgs) =>
-        msgs.concat([
-          {
-            type: "reply",
-            id: msgs.length,
-            content: streamMessage_1,
-            createdAt: Date.now(),
-          },
-        ]),
-      );
-      setStreamMessage_1("");
-    }
-    if (streamMessage_2) {
-      setMessages_2((msgs) =>
-        msgs.concat([
-          {
-            type: "reply",
-            id: msgs.length,
-            content: streamMessage_2,
-            createdAt: Date.now(),
-          },
-        ]),
-      );
-      setStreamMessage_2("");
-    }
-  };
+    setMessages((msgs) => {
+      const newMessages = { ...msgs };
+      ["model_a", "model_b"].forEach((model) => {
+        if (streamMessages[model]) {
+          newMessages[model] = msgs[model].concat([
+            {
+              type: "reply",
+              id: msgs[model].length,
+              content: streamMessages[model],
+              createdAt: Date.now(),
+            },
+          ]);
+          setStreamMessages((prev) => ({ ...prev, [model]: "" }));
+        }
+      });
+      return newMessages;
+    });
+  }, [controller, streamMessages]);
+
   const newRound = async () => {
     stopGenerate();
-    setNewRoungLoading(true);
+    setNewRoundLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setController(null);
-    setStreamMessage_1("");
-    setMessages_1([]);
-    setStreamMessage_2("");
-    setMessages_2([]);
-    setNewRoungLoading(false);
+    setStreamMessages({ model_a: "", model_b: "" });
+    setMessages({ model_a: [], model_b: [] });
+    setNewRoundLoading(false);
   };
 
   const sendTextChatMessages = async (content: string) => {
-    // temp stream message
-    const tempMessage = "";
-    const input: Message[] = [
-      {
-        type: "query",
-        content,
-        createdAt: Date.now(),
-        id: messages_1.length,
-      },
-    ];
-    setMessages_1((msg) => msg.concat(input));
-    setMessages_2((msg) => msg.concat(input));
+    const input: Message = {
+      type: "query",
+      content,
+      createdAt: Date.now(),
+      id: messages.model_a.length,
+    };
+
+    setMessages((msg) => ({
+      model_a: msg.model_a.concat(input),
+      model_b: msg.model_b.concat(input),
+    }));
     setText("");
     setLoading(true);
 
@@ -91,35 +88,24 @@ export const Battle = () => {
       });
 
       const stream = res.body;
-
       const reader = stream?.getReader();
-
-      let tempMessage1 = "";
-      let tempMessage2 = "";
       const decoder = new TextDecoder();
-      let shouldBreak = false; // 标志位
-      const oneFinish = false;
+      const tempMessages = { model_a: "", model_b: "" };
+      let shouldBreak = false;
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        console.log("Starting loop iteration");
         const { value, done } = await reader!.read();
-
         if (value) {
           const decodedValue = decoder.decode(value);
-          console.log("Decoded value:", decodedValue);
-
-          // 分割和处理数据包
           const dataPackets = decodedValue
             .split("\ndata:")
             .map((packet) => packet.trim())
             .filter((packet) => packet);
-          dataPackets.forEach((packet) => {
-            if (shouldBreak) return; // 如果标志位为真，退出 forEach 循环
 
-            console.log("Raw packet:", packet);
+          dataPackets.forEach((packet) => {
+            if (shouldBreak) return;
 
             try {
-              // 如果数据包前面有 'data:' 前缀，去掉它
               const jsonString = packet.startsWith("data:")
                 ? packet.slice(5).trim()
                 : packet.trim();
@@ -128,15 +114,12 @@ export const Battle = () => {
                 shouldBreak = true;
                 return;
               }
-              if (obj.message.content && obj.model === "model_a") {
-                tempMessage1 += obj.message.content;
-                console.log("Updated tempMessage1:", tempMessage1);
-                setStreamMessage_1(tempMessage1);
-              } else {
-                tempMessage2 += obj.message.content;
-                console.log("Updated tempMessage2:", tempMessage2);
-                setStreamMessage_2(tempMessage2);
-              }
+              const modelKey = obj.model === "model_a" ? "model_a" : "model_b";
+              tempMessages[modelKey] += obj.message.content;
+              setStreamMessages((prev) => ({
+                ...prev,
+                [modelKey]: tempMessages[modelKey],
+              }));
             } catch (error) {
               console.error(
                 "JSON parsing error:",
@@ -147,108 +130,70 @@ export const Battle = () => {
             }
           });
 
-          if (shouldBreak) break; // 如果标志位为真，退出 while 循环
+          if (shouldBreak) break;
         }
 
-        if (done) {
-          console.log("Done reading, breaking loop");
-          break;
-        }
+        if (done) break;
       }
 
       const now = Date.now();
-      const newMessage1 = {
-        content: tempMessage1,
-        createdAt: now,
-        id: messages_1.length,
+      const newMessages = {
+        model_a: {
+          content: tempMessages.model_a,
+          createdAt: now,
+          id: messages.model_a.length,
+        },
+        model_b: {
+          content: tempMessages.model_b,
+          createdAt: now,
+          id: messages.model_b.length,
+        },
       };
-      const newMessage2 = {
-        content: tempMessage2,
-        createdAt: now,
-        id: messages_2.length,
-      };
-      setMessages_1((prevMessages) => {
-        return prevMessages.concat([
-          { ...newMessage1, type: "reply", id: prevMessages.length },
-        ]);
-      });
-      setMessages_2((prevMessages) => {
-        return prevMessages.concat([
-          { ...newMessage2, type: "reply", id: prevMessages.length },
-        ]);
-      });
-      setStreamMessage_1("");
-      setStreamMessage_2("");
-      tempMessage1 = "";
-      tempMessage2 = "";
+      setMessages((prevMessages) => ({
+        model_a: prevMessages.model_a.concat({
+          ...newMessages.model_a,
+          type: "reply",
+        }),
+        model_b: prevMessages.model_b.concat({
+          ...newMessages.model_b,
+          type: "reply",
+        }),
+      }));
+      setStreamMessages({ model_a: "", model_b: "" });
     } catch (e: any) {
-      // abort manually or not
-      if (!tempMessage) {
-        if (e.name === "AbortError") {
-          setMessages_1((msgs) =>
-            msgs.concat([
-              {
-                type: "reply",
-                id: msgs.length,
-                content: `停止输出`,
-                createdAt: Date.now(),
-              },
-            ]),
-          );
-          setMessages_2((msgs) =>
-            msgs.concat([
-              {
-                type: "reply",
-                id: msgs.length,
-                content: `停止输出`,
-                createdAt: Date.now(),
-              },
-            ]),
-          );
-        } else {
-          setMessages_1((msgs) =>
-            msgs.concat([
-              {
-                type: "reply",
-                id: msgs.length,
-                content: `Error: ${e.message || e.stack || e}`,
-                createdAt: Date.now(),
-              },
-            ]),
-          );
-          setMessages_2((msgs) =>
-            msgs.concat([
-              {
-                type: "reply",
-                id: msgs.length,
-                content: `Error: ${e.message || e.stack || e}`,
-                createdAt: Date.now(),
-              },
-            ]),
-          );
-        }
-      }
+      const error = `Error: ${e.message || e.stack || e}`;
+      const errorMessage = {
+        id: messages.model_a.length,
+        content: error,
+        createdAt: Date.now(),
+      };
+      setMessages((msgs) => ({
+        model_a: msgs.model_a.concat({ ...errorMessage, type: "reply" }),
+        model_b: msgs.model_b.concat({ ...errorMessage, type: "reply" }),
+      }));
     } finally {
       setController(null);
       setLoading(false);
     }
   };
+
   const Battles = () => (
     <div className={"battles"}>
       <BattleComponent
-        messages={messages_1}
-        streamMessage={streamMessage_1}
+        messages={messages.model_a}
+        streamMessage={streamMessages.model_a}
         loading={loading}
         title={"模型A"}
       />
       <BattleComponent
-        messages={messages_2}
-        streamMessage={streamMessage_2}
+        messages={messages.model_b}
+        streamMessage={streamMessages.model_b}
         loading={loading}
         title={"模型B"}
       />
     </div>
   );
+
   return (
     <div className={"battle-page"}>
       <Title heading={4}>开始对战</Title>
@@ -259,7 +204,7 @@ export const Battle = () => {
       ) : (
         <Battles />
       )}
-      {messages_1.filter((x) => x.type === "reply").length > 0 && (
+      {messages.model_a.filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent />
       )}
       <Input
