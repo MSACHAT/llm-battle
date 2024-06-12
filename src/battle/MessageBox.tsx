@@ -33,10 +33,11 @@ const MessageBox: FC<{
   streamMessage: string;
   messages: Message[];
   loading: boolean;
-}> = ({ streamMessage, messages, loading }) => {
+  title: string;
+}> = ({ streamMessage, messages, loading, title }) => {
   const handleAutoScroll = useCallback(
     throttle(() => {
-      const element = document.querySelector("#content");
+      const element = document.querySelector("#content" + title);
       element!.scrollIntoView({
         behavior: "smooth",
         block: "end",
@@ -59,7 +60,7 @@ const MessageBox: FC<{
     };
   }, [messages]);
   return (
-    <div id="content">
+    <div id={"content" + title}>
       {messages.map((message, index) => {
         if (message.type === "query") {
           return <UserQuery key={index} content={message.content} />;

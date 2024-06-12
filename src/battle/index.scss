@@ -1,0 +1,30 @@
+.battle-page {
+  padding: 56px 140px;
+  display: flex;
+  flex-direction: column;
+  height:calc(100vh - 200px); // 占据整个视口高度
+  .battles {
+    width: 100%;
+    display: flex;
+    flex: 1; // 占据剩余空间
+    gap: 40px;
+    overflow: hidden; // 防止内部滚动条影响布局
+    .battle-single-chat {
+      width: 100%;
+      flex: 1; // 每个BattleComponent占据相等的空间
+      display: flex; // 添加display: flex
+      flex-direction: column; // 让子元素垂直排列
+      .single-chat-area {
+        margin-top: 12px;
+        flex-grow: 1; // 确保占据剩余空间
+        background-color: var(--semi-color-fill-0);
+        overflow-y: auto; // 内容可以垂直滚动
+        border-radius: 20px;
+        padding: 32px 40px 32px 40px;
+      }
+    }
+  }
+  .semi-input-wrapper {
+    margin-top: 65px;
+  }
+}

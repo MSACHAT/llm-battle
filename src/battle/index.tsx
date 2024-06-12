@@ -1,50 +1,31 @@
-import { FC, useRef, useState } from "react";
-import MessageBox from "./MessageBox";
+import Title from "@douyinfe/semi-ui/lib/es/typography/title";
+import "./index.scss";
+import { BattleComponent } from "@/battle/index_2";
+import { Input, Space } from "@douyinfe/semi-ui";
+import { useState } from "react";
 import { Message } from "@/interface";
-import { Avatar, Button, Input } from "@douyinfe/semi-ui";
-// import "./index.scss";
-import InfiniteScroll from "react-infinite-scroll-component";
-
-type ChatMessage = {
-  content: string;
-  type: "reply" | "query";
-  id: number;
-};
-const fakeData: ChatMessage[] = [
-  { content: "test1", type: "query", id: 1 },
-  { content: "test1", type: "reply", id: 2 },
-  { content: "test1", type: "query", id: 3 },
-  { content: "test1", type: "reply", id: 4 },
-  { content: "test1", type: "query", id: 5 },
-  { content: "test1", type: "reply", id: 6 },
-  { content: "test1", type: "query", id: 7 },
-  { content: "test1", type: "reply", id: 8 },
-  { content: "test1", type: "query", id: 9 },
-  { content: "test1", type: "reply", id: 10 },
-  { content: "test1", type: "query", id: 11 },
-  { content: "test1", type: "reply", id: 12 },
-  { content: "test1", type: "query", id: 13 },
-  { content: "test1", type: "reply", id: 14 },
-  { content: "test1", type: "query", id: 15 },
-  { content: "test1", type: "reply", id: 16 },
-  { content: "test1", type: "query", id: 17 },
-  { content: "test2", type: "reply", id: 18 },
-];
 export const Battle = () => {
-  // input text
   const [text, setText] = useState("");
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([...fakeData]);
-  const MAX_DATA = 30;
-  const hasMore = chatHistory.length < MAX_DATA;
-  // controller
   const [controller, setController] = useState<any>(null);
-
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
   const [streamMessage, setStreamMessage] = useState("");
-
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const stopGenerate = () => {
+    controller?.abort?.();
+    if (streamMessage) {
+      setMessages((msgs) =>
+        msgs.concat([
+          {
+            type: "reply",
+            id: msgs.length,
+            content: streamMessage,
+            createdAt: Date.now(),
+          },
+        ]),
+      );
+      setStreamMessage("");
+    }
+  };
   const sendTextChatMessages = async (content: string) => {
     // temp stream message
     const tempMessage = "";
@@ -195,94 +176,32 @@ export const Battle = () => {
       setLoading(false);
     }
   };
-  const stopGenerate = () => {
-    controller?.abort?.();
-    if (streamMessage) {
-      setMessages((msgs) =>
-        msgs.concat([
-          {
-            type: "reply",
-            id: msgs.length,
-            content: streamMessage,
-            createdAt: Date.now(),
-          },
-        ]),
-      );
-      setStreamMessage("");
-    }
-  };
-
   return (
-    <div className={"single-chat"}>
-      <div className={"single-chat-content"}>
-        <div className={"chat-history-list"} id="chat-history-list">
-          <InfiniteScroll
-            endMessage={"没有更多数据了"}
-            dataLength={chatHistory.length}
-            scrollableTarget={"chat-history-list"}
-            loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
-            inverse={true}
-            hasMore={hasMore}
-            next={() => {
-              console.log();
-            }}
-            style={{
-              display: "flex",
-              flexDirection: "column-reverse",
-              overflow: "visible",
-            }}
-          >
-            <div ref={bottomRef} />
-            <div className={"chat-history-list-content"}>
-              <MessageBox
-                streamMessage={streamMessage}
-                messages={messages}
-                loading={loading}
-              />
-            </div>
-          </InfiniteScroll>
-        </div>
-        <div className={"user-input"}>
-          <Input
-            autoFocus
-            style={{ background: "white" }}
-            value={text}
-            onChange={(v) => setText(v)}
-            // streamMessage={streamMessage}
-            onEnterPress={async () => {
-              stopGenerate();
-              await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
-              sendTextChatMessages(text);
-            }}
-            // onCancel={stopGenerate}
-          />
-          {/*<Button*/}
-          {/*  className={"send-button"}*/}
-          {/*  onClick={() => {*/}
-          {/*    if (!isSending) {*/}
-          {/*      canAutoScrollRef.current = true;*/}
-          {/*      chatHistoryLength.current += 1;*/}
-          {/*      setChatHistory((prevHistory) => [*/}
-          {/*        ...prevHistory,*/}
-          {/*        {*/}
-          {/*          content: userInput,*/}
-          {/*          type: "query",*/}
-          {/*          id: chatHistoryLength.current + 1,*/}
-          {/*        },*/}
-          {/*      ]);*/}
-          {/*      setUserInput("");*/}
-          {/*      query(userInput);*/}
-          {/*    } else {*/}
-          {/*      console.log("发送结束请求");*/}
-          {/*      setIsSending(false);*/}
-          {/*    }*/}
-          {/*  }}*/}
-          {/*  disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending*/}
-          {/*>*/}
-          {/*  {isSending ? <>{buttonContent}</> : <>发送</>}*/}
-          {/*</Button>*/}
-        </div>
+    <div className={"battle-page"}>
+      <Title heading={4}>开始对战</Title>
+      <div className={"battles"}>
+        <BattleComponent
+          messages={messages}
+          streamMessage={streamMessage}
+          loading={loading}
+        />
+        <BattleComponent
+          messages={messages}
+          streamMessage={streamMessage}
+          loading={loading}
+        />
       </div>
+      <Input
+        autoFocus
+        value={text}
+        onChange={(v) => setText(v)}
+        onEnterPress={async () => {
+          stopGenerate();
+          await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+          sendTextChatMessages(text);
+        }}
+        // onCancel={stopGenerate}
+      />
     </div>
   );
 };
