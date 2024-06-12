@@ -1,8 +1,8 @@
-import { Avatar, Dropdown, Nav, Space } from "@douyinfe/semi-ui";
+import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
-
+import "./index.scss";
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 interface NavBarProps {
   beShown: boolean;
@@ -50,7 +50,22 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
         ]}
         footer={
           <Space>
-            <img src={RuleIcon} style={{ width: 32, height: 32 }} />
+            <Tooltip
+              position={"bottom"}
+              content={
+                <div className={"PK-tooltip"}>
+                  PK规则：
+                  <ul>
+                    <li>向两个匿名模型提出任何问题，并投票给更好的一个！</li>
+                    <li>您可以多轮聊天，直到确定获胜者。</li>
+                    <li>如果在对话过程中暴露模特身份，则不会计算选票。</li>
+                  </ul>
+                </div>
+              }
+            >
+              <img src={RuleIcon} style={{ width: 32, height: 32 }} />
+            </Tooltip>
+
             <Dropdown
               position="bottomRight"
               render={

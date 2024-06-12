@@ -8,24 +8,39 @@ import VoteComponent from "@/battle/components/voteComponent";
 export const Battle = () => {
   const [text, setText] = useState("");
   const [controller, setController] = useState<any>(null);
-  const [streamMessage, setStreamMessage] = useState("");
+  const [streamMessage_1, setStreamMessage_1] = useState("");
+  const [streamMessage_2, setStreamMessage_2] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages_1, setMessages_1] = useState<Message[]>([]);
+  const [messages_2, setMessages_2] = useState<Message[]>([]);
   const [newRoundLoading, setNewRoungLoading] = useState(false);
   const stopGenerate = () => {
     controller?.abort?.();
-    if (streamMessage) {
-      setMessages((msgs) =>
+    if (streamMessage_1) {
+      setMessages_1((msgs) =>
         msgs.concat([
           {
             type: "reply",
             id: msgs.length,
-            content: streamMessage,
+            content: streamMessage_1,
             createdAt: Date.now(),
           },
         ]),
       );
-      setStreamMessage("");
+      setStreamMessage_1("");
+    }
+    if (streamMessage_2) {
+      setMessages_2((msgs) =>
+        msgs.concat([
+          {
+            type: "reply",
+            id: msgs.length,
+            content: streamMessage_2,
+            createdAt: Date.now(),
+          },
+        ]),
+      );
+      setStreamMessage_2("");
     }
   };
   const newRound = async () => {
@@ -33,48 +48,44 @@ export const Battle = () => {
     setNewRoungLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setController(null);
-    setStreamMessage("");
-    setMessages([]);
+    setStreamMessage_1("");
+    setMessages_1([]);
+    setStreamMessage_2("");
+    setMessages_2([]);
     setNewRoungLoading(false);
   };
 
   const sendTextChatMessages = async (content: string) => {
     // temp stream message
     const tempMessage = "";
-    console.log(tempMessage, 11111);
     const input: Message[] = [
       {
         type: "query",
         content,
         createdAt: Date.now(),
-        id: messages.length,
+        id: messages_1.length,
       },
     ];
-    setMessages((msg) => msg.concat(input));
+    setMessages_1((msg) => msg.concat(input));
+    setMessages_2((msg) => msg.concat(input));
     setText("");
     setLoading(true);
 
     try {
       const abortController = new AbortController();
       setController(abortController);
-      const res = await fetch("https://api.coze.cn/open_api/v2/chat", {
+      const res = await fetch("http://172.10.21.42:8087/api/battle/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization:
-            "Bearer pat_yzumqWcV3NgGMHYSEW05brcVUfZgAklWQheAzLDv04QZf1jHFnp0doL7598g3zqG",
-
           Accept: "*/*",
-          Host: "api.coze.cn",
+          Host: "api.coze.com",
           Connection: "keep-alive",
         },
         body: JSON.stringify({
-          // content_type: "text",
+          content_type: "text",
           conversation_id: "1",
           query: content,
-          stream: true,
-          user: "1",
-          bot_id: "7341000200011546658",
         }),
         signal: abortController.signal,
       });
@@ -83,10 +94,11 @@ export const Battle = () => {
 
       const reader = stream?.getReader();
 
-      let tempMessage = "";
+      let tempMessage1 = "";
+      let tempMessage2 = "";
       const decoder = new TextDecoder();
       let shouldBreak = false; // 标志位
-
+      const oneFinish = false;
       // eslint-disable-next-line no-constant-condition
       while (true) {
         console.log("Starting loop iteration");
@@ -113,18 +125,24 @@ export const Battle = () => {
                 ? packet.slice(5).trim()
                 : packet.trim();
               const obj = JSON.parse(jsonString);
-              console.log("Parsed object:", obj);
-
-              if (obj.is_finish) {
-                console.log("Received is_finish, setting shouldBreak to true");
-                shouldBreak = true; // 设置标志位为真
-                return; // 退出 forEach 循环
+              console.log(
+                "Parsed object:",
+                obj,
+                obj.event === "done",
+                !oneFinish,
+              );
+              if (obj.event === "done") {
+                shouldBreak = true;
+                return;
               }
-
-              if (obj.message.content) {
-                tempMessage += obj.message.content;
-                console.log("Updated tempMessage:", tempMessage);
-                setStreamMessage(tempMessage);
+              if (obj.message.content && obj.message.model === "model_a") {
+                tempMessage1 += obj.message.content;
+                console.log("Updated tempMessage:", tempMessage1);
+                setStreamMessage_1(tempMessage1);
+              } else {
+                tempMessage2 += obj.message.content;
+                console.log("Updated tempMessage:", tempMessage2);
+                setStreamMessage_2(tempMessage2);
               }
             } catch (error) {
               console.error(
@@ -146,23 +164,45 @@ export const Battle = () => {
       }
 
       const now = Date.now();
-      const newMessage = {
-        content: tempMessage,
+      const newMessage1 = {
+        content: tempMessage1,
         createdAt: now,
-        id: messages.length,
+        id: messages_1.length,
       };
-      setMessages((prevMessages) => {
+      const newMessage2 = {
+        content: tempMessage2,
+        createdAt: now,
+        id: messages_2.length,
+      };
+      setMessages_1((prevMessages) => {
         return prevMessages.concat([
-          { ...newMessage, type: "reply", id: prevMessages.length },
+          { ...newMessage1, type: "reply", id: prevMessages.length },
         ]);
       });
-      setStreamMessage("");
-      tempMessage = "";
+      setMessages_2((prevMessages) => {
+        return prevMessages.concat([
+          { ...newMessage2, type: "reply", id: prevMessages.length },
+        ]);
+      });
+      setStreamMessage_1("");
+      setStreamMessage_2("");
+      tempMessage1 = "";
+      tempMessage2 = "";
     } catch (e: any) {
       // abort manually or not
       if (!tempMessage) {
         if (e.name === "AbortError") {
-          setMessages((msgs) =>
+          setMessages_1((msgs) =>
+            msgs.concat([
+              {
+                type: "reply",
+                id: msgs.length,
+                content: `停止输出`,
+                createdAt: Date.now(),
+              },
+            ]),
+          );
+          setMessages_2((msgs) =>
             msgs.concat([
               {
                 type: "reply",
@@ -173,7 +213,17 @@ export const Battle = () => {
             ]),
           );
         } else {
-          setMessages((msgs) =>
+          setMessages_1((msgs) =>
+            msgs.concat([
+              {
+                type: "reply",
+                id: msgs.length,
+                content: `Error: ${e.message || e.stack || e}`,
+                createdAt: Date.now(),
+              },
+            ]),
+          );
+          setMessages_2((msgs) =>
             msgs.concat([
               {
                 type: "reply",
@@ -193,14 +243,14 @@ export const Battle = () => {
   const Battles = () => (
     <div className={"battles"}>
       <BattleComponent
-        messages={messages}
-        streamMessage={streamMessage}
+        messages={messages_1}
+        streamMessage={streamMessage_1}
         loading={loading}
         title={"模型A"}
       />
       <BattleComponent
-        messages={messages}
-        streamMessage={streamMessage}
+        messages={messages_2}
+        streamMessage={streamMessage_2}
         loading={loading}
         title={"模型B"}
       />
@@ -216,7 +266,7 @@ export const Battle = () => {
       ) : (
         <Battles />
       )}
-      {messages.filter((x) => x.type === "reply").length > 0 && (
+      {messages_1.filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent />
       )}
       <Input
