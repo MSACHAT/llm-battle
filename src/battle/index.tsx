@@ -45,24 +45,27 @@ export const Battle = () => {
     try {
       const abortController = new AbortController();
       setController(abortController);
-      const res = await fetch(
-        "http://172.10.21.42:8087/api/conversation/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "*/*",
-            Host: "api.coze.com",
-            Connection: "keep-alive",
-          },
-          body: JSON.stringify({
-            content_type: "text",
-            conversation_id: "1",
-            query: content,
-          }),
-          signal: abortController.signal,
+      const res = await fetch("https://api.coze.cn/open_api/v2/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer pat_yzumqWcV3NgGMHYSEW05brcVUfZgAklWQheAzLDv04QZf1jHFnp0doL7598g3zqG",
+
+          Accept: "*/*",
+          Host: "api.coze.cn",
+          Connection: "keep-alive",
         },
-      );
+        body: JSON.stringify({
+          // content_type: "text",
+          conversation_id: "1",
+          query: content,
+          stream: true,
+          user: "1",
+          bot_id: "7341000200011546658",
+        }),
+        signal: abortController.signal,
+      });
 
       const stream = res.body;
 
@@ -184,11 +187,13 @@ export const Battle = () => {
           messages={messages}
           streamMessage={streamMessage}
           loading={loading}
+          title={"模型A"}
         />
         <BattleComponent
           messages={messages}
           streamMessage={streamMessage}
           loading={loading}
+          title={"模型B"}
         />
       </div>
       <Input
