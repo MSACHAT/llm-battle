@@ -16,7 +16,7 @@ const VoteComponent: React.FC = () => {
             </Text>
           ),
           content: "您的投票将被记入排行榜",
-          duration: 0,
+          duration: 3,
         });
         setFlag(true);
       }}
