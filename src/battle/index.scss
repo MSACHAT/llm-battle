@@ -4,7 +4,7 @@
   flex-direction: column;
   height:calc(100vh - 200px); // 占据整个视口高度
   .battles {
-    padding-top: 52px;
+    padding:52px 0 25px 0;
     width: 100%;
     display: flex;
     flex: 1; // 占据剩余空间
@@ -46,7 +46,19 @@
       }
     }
   }
+  .button-container {
+    display: flex;
+    width: 100%;
+    gap: 36px;
+    justify-content: space-between;
+    margin-top: 25px;
+  }
+  .button-container button {
+    flex: 1; /* 让按钮均分可用空间 */
+    padding: 10px; /* 可选：增加按钮内边距，使其更美观 */
+    box-sizing: border-box; /* 确保 padding 不会影响按钮的宽度 */
+  }
   .semi-input-wrapper {
-    margin-top: 65px;
+    margin-top: 40px;
   }
 }

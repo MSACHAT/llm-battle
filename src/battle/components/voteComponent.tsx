@@ -1,51 +1,15 @@
 import { Button } from "@douyinfe/semi-ui";
 import React from "react";
 
-const voteComponent: React.FC = () => {
+const VoteComponent: React.FC = () => {
   return (
-    <div style={{ justifyContent: "center" }}>
-      <Button
-        style={{
-          width: "23.9375rem",
-          margin: " 0.375rem  1.5rem 0.375rem  1.5rem",
-          backgroundColor: "#F5C950",
-          color: "black",
-        }}
-      >
-        👈左边好些
-      </Button>
-      <Button
-        style={{
-          width: "23.9375rem",
-          margin: " 0.375rem  1.5rem 0.375rem  1.5rem",
-          backgroundColor: "#F5C950",
-          color: "black",
-        }}
-      >
-        👉右边好些
-      </Button>
-      <Button
-        style={{
-          width: "23.9375rem",
-          margin: " 0.375rem  1.5rem 0.375rem  1.5rem",
-          backgroundColor: "#F5C950",
-          color: "black",
-        }}
-      >
-        平局
-      </Button>
-      <Button
-        style={{
-          width: "23.9375rem",
-          margin: " 0.375rem  1.5rem 0.375rem  1.5rem",
-          backgroundColor: "#F5C950",
-          color: "black",
-        }}
-      >
-        都不好
-      </Button>
+    <div className="button-container">
+      <Button theme="solid">👈左边好些</Button>
+      <Button theme="solid">👉右边好些</Button>
+      <Button theme="solid">平局</Button>
+      <Button theme="solid">都不好</Button>
     </div>
   );
 };
 
-export default voteComponent;
+export default VoteComponent;

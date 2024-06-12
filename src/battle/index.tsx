@@ -1,9 +1,10 @@
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
-import { BattleComponent } from "@/battle/index_2";
-import { Input, Space } from "@douyinfe/semi-ui";
+import { BattleComponent } from "./components/BattleComponent";
+import { Button, Input, Space } from "@douyinfe/semi-ui";
 import { useState } from "react";
 import { Message } from "@/interface";
+import VoteComponent from "@/battle/components/voteComponent";
 export const Battle = () => {
   const [text, setText] = useState("");
   const [controller, setController] = useState<any>(null);
@@ -26,6 +27,14 @@ export const Battle = () => {
       setStreamMessage("");
     }
   };
+  const newRound = async () => {
+    stopGenerate();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    setController(null);
+    setStreamMessage("");
+    setMessages([]);
+  };
+
   const sendTextChatMessages = async (content: string) => {
     // temp stream message
     const tempMessage = "";
@@ -195,6 +204,9 @@ export const Battle = () => {
           title={"模型B"}
         />
       </div>
+      {messages.filter((x) => x.type === "reply").length > 0 && (
+        <VoteComponent />
+      )}
       <Input
         autoFocus
         placeholder={
@@ -208,6 +220,7 @@ export const Battle = () => {
           sendTextChatMessages(text);
         }}
       />
+      <Button onClick={newRound}>新一轮</Button>
     </div>
   );
 };
