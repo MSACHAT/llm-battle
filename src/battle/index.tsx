@@ -190,24 +190,32 @@ export const Battle = () => {
       setLoading(false);
     }
   };
+  const Battles = () => (
+    <div className={"battles"}>
+      <BattleComponent
+        messages={messages}
+        streamMessage={streamMessage}
+        loading={loading}
+        title={"模型A"}
+      />
+      <BattleComponent
+        messages={messages}
+        streamMessage={streamMessage}
+        loading={loading}
+        title={"模型B"}
+      />
+    </div>
+  );
   return (
     <div className={"battle-page"}>
       <Title heading={4}>开始对战</Title>
-      <div className={"battles"}>
-        {newRoundLoading && <Spin />}
-        <BattleComponent
-          messages={messages}
-          streamMessage={streamMessage}
-          loading={loading}
-          title={"模型A"}
-        />
-        <BattleComponent
-          messages={messages}
-          streamMessage={streamMessage}
-          loading={loading}
-          title={"模型B"}
-        />
-      </div>
+      {newRoundLoading ? (
+        <Spin>
+          <Battles />
+        </Spin>
+      ) : (
+        <Battles />
+      )}
       {messages.filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent />
       )}
