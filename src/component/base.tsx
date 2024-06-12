@@ -51,11 +51,11 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
         footer={
           <Space>
             <Tooltip
-              position={"bottom"}
+              position={"bottomRight"}
               content={
                 <div className={"PK-tooltip"}>
-                  PK规则：
                   <ul>
+                    PK规则：
                     <li>向两个匿名模型提出任何问题，并投票给更好的一个！</li>
                     <li>您可以多轮聊天，直到确定获胜者。</li>
                     <li>如果在对话过程中暴露模特身份，则不会计算选票。</li>
