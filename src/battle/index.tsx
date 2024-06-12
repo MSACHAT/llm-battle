@@ -5,28 +5,35 @@ import { Button, Input, Space, Spin } from "@douyinfe/semi-ui";
 import { useState, useCallback } from "react";
 import { Message } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
+import config from "@/config/config";
+interface StreamMessages {
+  [key: string]: string;
+}
 
+interface Messages {
+  [key: string]: Message[];
+}
+const models = ["model_a", "model_b"]; // 模型列表
 export const Battle = () => {
   const [text, setText] = useState("");
   const [controller, setController] = useState<any>(null);
-  const [streamMessages, setStreamMessages] = useState<{
-    [key: string]: string;
-  }>({
-    model_a: "",
-    model_b: "",
-  });
+  const [streamMessages, setStreamMessages] = useState<StreamMessages>(
+    models.reduce(
+      (acc, model) => ({ ...acc, [model]: "" }),
+      {} as StreamMessages,
+    ),
+  );
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<{ [key: string]: Message[] }>({
-    model_a: [],
-    model_b: [],
-  });
+  const [messages, setMessages] = useState<Messages>(
+    models.reduce((acc, model) => ({ ...acc, [model]: [] }), {} as Messages),
+  );
   const [newRoundLoading, setNewRoundLoading] = useState(false);
-
+  const [modelNames, setModelNames] = useState(["模型A", "模型B"]);
   const stopGenerate = useCallback(() => {
     controller?.abort?.();
     setMessages((msgs) => {
       const newMessages = { ...msgs };
-      ["model_a", "model_b"].forEach((model) => {
+      models.forEach((model) => {
         if (streamMessages[model]) {
           newMessages[model] = msgs[model].concat([
             {
@@ -48,8 +55,10 @@ export const Battle = () => {
     setNewRoundLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setController(null);
-    setStreamMessages({ model_a: "", model_b: "" });
-    setMessages({ model_a: [], model_b: [] });
+    setStreamMessages(
+      models.reduce((acc, model) => ({ ...acc, [model]: "" }), {}),
+    );
+    setMessages(models.reduce((acc, model) => ({ ...acc, [model]: [] }), {}));
     setNewRoundLoading(false);
   };
 
@@ -58,20 +67,23 @@ export const Battle = () => {
       type: "query",
       content,
       createdAt: Date.now(),
-      id: messages.model_a.length,
+      id: messages[models[0]].length, // Assuming all models have the same message length
     };
 
-    setMessages((msg) => ({
-      model_a: msg.model_a.concat(input),
-      model_b: msg.model_b.concat(input),
-    }));
+    setMessages((msg) => {
+      const newMessages = { ...msg };
+      models.forEach((model) => {
+        newMessages[model] = msg[model].concat(input);
+      });
+      return newMessages;
+    });
     setText("");
     setLoading(true);
 
     try {
       const abortController = new AbortController();
       setController(abortController);
-      const res = await fetch("http://172.10.21.42:8087/api/battle/chat", {
+      const res = await fetch(config.apiUrl + "/api/battle/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +102,10 @@ export const Battle = () => {
       const stream = res.body;
       const reader = stream?.getReader();
       const decoder = new TextDecoder();
-      const tempMessages = { model_a: "", model_b: "" };
+      const tempMessages: StreamMessages = models.reduce(
+        (acc, model) => ({ ...acc, [model]: "" }),
+        {},
+      );
       let shouldBreak = false;
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -114,7 +129,9 @@ export const Battle = () => {
                 shouldBreak = true;
                 return;
               }
-              const modelKey = obj.model === "model_a" ? "model_a" : "model_b";
+              const modelKey = models.includes(obj.model)
+                ? obj.model
+                : models[0];
               tempMessages[modelKey] += obj.message.content;
               setStreamMessages((prev) => ({
                 ...prev,
@@ -137,40 +154,48 @@ export const Battle = () => {
       }
 
       const now = Date.now();
-      const newMessages = {
-        model_a: {
-          content: tempMessages.model_a,
-          createdAt: now,
-          id: messages.model_a.length,
+      const newMessages = models.reduce(
+        (acc, model) => {
+          acc[model] = {
+            content: tempMessages[model],
+            createdAt: now,
+            id: messages[model].length,
+            type: "reply",
+          };
+          return acc;
         },
-        model_b: {
-          content: tempMessages.model_b,
-          createdAt: now,
-          id: messages.model_b.length,
-        },
-      };
-      setMessages((prevMessages) => ({
-        model_a: prevMessages.model_a.concat({
-          ...newMessages.model_a,
-          type: "reply",
-        }),
-        model_b: prevMessages.model_b.concat({
-          ...newMessages.model_b,
-          type: "reply",
-        }),
-      }));
-      setStreamMessages({ model_a: "", model_b: "" });
+        {} as { [key: string]: Message },
+      );
+
+      setMessages((prevMessages) => {
+        const updatedMessages = { ...prevMessages };
+        models.forEach((model) => {
+          updatedMessages[model] = prevMessages[model].concat(
+            newMessages[model],
+          );
+        });
+        return updatedMessages;
+      });
+      setStreamMessages(
+        models.reduce((acc, model) => ({ ...acc, [model]: "" }), {}),
+      );
     } catch (e: any) {
       const error = `Error: ${e.message || e.stack || e}`;
       const errorMessage = {
-        id: messages.model_a.length,
+        id: messages[models[0]].length,
         content: error,
         createdAt: Date.now(),
       };
-      setMessages((msgs) => ({
-        model_a: msgs.model_a.concat({ ...errorMessage, type: "reply" }),
-        model_b: msgs.model_b.concat({ ...errorMessage, type: "reply" }),
-      }));
+      setMessages((msgs) => {
+        const updatedMessages = { ...msgs };
+        models.forEach((model) => {
+          updatedMessages[model] = msgs[model].concat({
+            ...errorMessage,
+            type: "reply",
+          });
+        });
+        return updatedMessages;
+      });
     } finally {
       setController(null);
       setLoading(false);
@@ -179,24 +204,21 @@ export const Battle = () => {
 
   const Battles = () => (
     <div className={"battles"}>
-      <BattleComponent
-        messages={messages.model_a}
-        streamMessage={streamMessages.model_a}
-        loading={loading}
-        title={"模型A"}
-      />
-      <BattleComponent
-        messages={messages.model_b}
-        streamMessage={streamMessages.model_b}
-        loading={loading}
-        title={"模型B"}
-      />
+      {models.map((model, index) => (
+        <BattleComponent
+          key={index}
+          messages={messages[model]}
+          streamMessage={streamMessages[model]}
+          loading={loading}
+          title={modelNames[index]}
+        />
+      ))}
     </div>
   );
 
   return (
     <div className={"battle-page"}>
-      <Title heading={4}>开始对战</Title>
+      <Title heading={5}>开始对战</Title>
       {newRoundLoading ? (
         <Spin>
           <Battles />
@@ -204,13 +226,13 @@ export const Battle = () => {
       ) : (
         <Battles />
       )}
-      {messages.model_a.filter((x) => x.type === "reply").length > 0 && (
+      {messages[models[0]].filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent />
       )}
       <Input
         autoFocus
         placeholder={
-          "在这里输入问题，按Enter发送，你会得到AB模型的不同答案并可以为它们投票"
+          "在这里输入问题，按Enter发送，你会得到模型的不同答案并可以为它们投票"
         }
         value={text}
         onChange={(v) => setText(v)}

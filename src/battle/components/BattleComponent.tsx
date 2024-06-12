@@ -16,7 +16,7 @@ export const BattleComponent = ({
 }) => {
   return (
     <div className={"battle-single-chat"}>
-      <Title heading={5}>{title}</Title>
+      <Title heading={6}>{title}</Title>
       <div className={"single-chat-area"}>
         <MessageBox
           streamMessage={streamMessage}
