@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef } from "react";
 import { Message } from "@/interface";
-import "../singleChat/index.scss";
+import "../../singleChat/index.scss";
 import { Spin } from "@douyinfe/semi-ui";
 
 const BlinkingCursor: React.FC = () => {

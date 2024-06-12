@@ -1,7 +1,7 @@
 import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import voteComponent from "@/component/voteComponent";
-import VoteComponent from "@/component/voteComponent";
+import voteComponent from "@/battle/components/voteComponent";
+import VoteComponent from "@/battle/components/voteComponent";
 
 export default {
   title: "VoteComponent",
