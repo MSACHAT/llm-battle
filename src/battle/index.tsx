@@ -240,12 +240,16 @@ export const Battle = () => {
           value={text}
           onChange={(v) => setText(v)}
           onEnterPress={async () => {
+            if (!text) {
+              return;
+            }
             stopGenerate();
             await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
             sendTextChatMessages(text);
           }}
         />
         <Button
+          disabled={!text.length && !answering}
           theme="solid"
           className={"battle-send-button"}
           onClick={stopGenerate}
