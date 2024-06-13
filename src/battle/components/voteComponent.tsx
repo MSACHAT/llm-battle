@@ -41,13 +41,17 @@ const VoteComponent = ({
       disabled={flag}
       onClick={() => {
         apiClient
-          .post<{ models: ModelModel[] }>("api/v1/vote/sidebyside_anonymous", {
+          .post<{
+            states: {
+              model: ModelModel;
+            }[];
+          }>("api/v1/vote/sidebyside_anonymous", {
             type: type,
             battle_id,
             ip,
           })
           .then((res) => {
-            onVoteFinish(res.models);
+            onVoteFinish(res.states.map((x) => x.model));
             Notification.info({
               title: (
                 <Text strong style={{ fontSize: 18 }}>
