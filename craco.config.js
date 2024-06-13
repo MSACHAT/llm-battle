@@ -1,5 +1,5 @@
 const path = require("path");
-const { webpack } = require("@storybook/react-webpack5/preset");
+const webpack = require("webpack");
 const SemiWebpackPlugin = require("@douyinfe/semi-webpack-plugin").default;
 
 module.exports = {
