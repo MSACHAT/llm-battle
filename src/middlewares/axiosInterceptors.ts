@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import config from "@/config/config";
 
 // 创建泛型接口，用于定义 API 响应数据结构
@@ -48,7 +48,6 @@ class APIClient {
 
   // 响应拦截器处理函数
   private handleSuccess<T>(response: ApiResponse<T>): T {
-    console.log(response);
     return response.data;
   }
 

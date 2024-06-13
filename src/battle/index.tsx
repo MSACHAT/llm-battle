@@ -28,21 +28,23 @@ export const Battle = () => {
   const [messages, setMessages] = useState<Messages>(
     models.reduce((acc, model) => ({ ...acc, [model]: [] }), {} as Messages),
   );
-  const [newRoundLoading, setNewRoundLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [knownModels, setKnownModels] = useState<ModelModel[]>([
     { model_name: "chatgpt", _id: "1" },
     { model_name: "kimi", _id: "1" },
   ]);
   const [battle_id, setBattle_id] = useState("");
   const stopGenerate = useCallback(() => {
-    controller?.abort?.();
     if (!battle_id) {
       return;
     }
-    setNewRoundLoading(true);
-    apiClient.post("/api/battle/break_message", { battle_id }).then(() => {
-      setNewRoundLoading(false);
+
+    setLoading(true);
+    apiClient.post("/api/battle/break_message", { battle_id }).finally(() => {
+      setLoading(false);
     });
+    controller?.abort?.();
+
     setMessages((msgs) => {
       const newMessages = { ...msgs };
       models.forEach((model) => {
@@ -64,14 +66,14 @@ export const Battle = () => {
 
   const newRound = async () => {
     stopGenerate();
-    setNewRoundLoading(true);
+    setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setController(null);
     setStreamMessages(
       models.reduce((acc, model) => ({ ...acc, [model]: "" }), {}),
     );
     setMessages(models.reduce((acc, model) => ({ ...acc, [model]: [] }), {}));
-    setNewRoundLoading(false);
+    setLoading(false);
     setKnownModels([]);
   };
 
@@ -246,7 +248,7 @@ export const Battle = () => {
   return (
     <div className={"battle-page"}>
       <Title heading={5}>开始对战</Title>
-      {newRoundLoading ? (
+      {loading ? (
         <Spin>
           <Battles />
         </Spin>
