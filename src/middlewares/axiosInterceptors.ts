@@ -47,8 +47,9 @@ class APIClient {
   }
 
   // 响应拦截器处理函数
-  private handleSuccess<T>(response: AxiosResponse<ApiResponse<T>>): T {
-    return response.data.data;
+  private handleSuccess<T>(response: ApiResponse<T>): T {
+    console.log(response);
+    return response.data;
   }
 
   // 处理错误
@@ -121,7 +122,7 @@ class APIClient {
   // GET 请求方法
   public get<T>(url: string, params?: any): Promise<T> {
     return this.client
-      .get<ApiResponse<T>>(url, { params })
+      .get<T>(url, { params })
       .then(this.handleSuccess)
       .catch(this.handleError);
   }
@@ -129,7 +130,7 @@ class APIClient {
   // POST 请求方法
   public post<T>(url: string, data?: any): Promise<T> {
     return this.client
-      .post<ApiResponse<T>>(url, data)
+      .post<T>(url, data)
       .then(this.handleSuccess)
       .catch(this.handleError);
   }
@@ -137,7 +138,7 @@ class APIClient {
   // PUT 请求方法
   public put<T>(url: string, data?: any): Promise<T> {
     return this.client
-      .put<ApiResponse<T>>(url, data)
+      .put<T>(url, data)
       .then(this.handleSuccess)
       .catch(this.handleError);
   }
@@ -145,7 +146,7 @@ class APIClient {
   // DELETE 请求方法
   public delete<T>(url: string): Promise<T> {
     return this.client
-      .delete<ApiResponse<T>>(url)
+      .delete<T>(url)
       .then(this.handleSuccess)
       .catch(this.handleError);
   }

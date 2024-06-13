@@ -1,12 +1,13 @@
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router-dom";
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
+import { ModelModel } from "@/interface";
 
 export const ModelText = ({
-  detail,
+  model,
   isTitle,
 }: {
-  detail: any;
+  model: ModelModel;
   isTitle?: boolean;
 }) => {
   const navi = useNavigate();
@@ -18,7 +19,7 @@ export const ModelText = ({
         window.open("/singleChat");
       }}
     >
-      {detail.text}
+      {model.model_name}
     </Title>
   ) : (
     <Text
@@ -27,7 +28,7 @@ export const ModelText = ({
         navi("/singleChat");
       }}
     >
-      {detail.text}
+      {model.model_name}
     </Text>
   );
 };

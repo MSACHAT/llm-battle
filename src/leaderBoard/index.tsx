@@ -368,7 +368,9 @@ const columns = [
   {
     title: "Model",
     dataIndex: "Model",
-    render: (text: string) => <ModelText detail={{ text }} />,
+    render: (model_name: string) => (
+      <ModelText model={{ model_name, _id: "1" }} />
+    ),
   },
   { title: "Elo", dataIndex: "Elo" },
   { title: "95% CI", dataIndex: "95% CI" },
