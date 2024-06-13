@@ -21,7 +21,7 @@ function App() {
         <Route path="/" element={<NavigationBar beShown={true} />}>
           <Route path="battle" element={<Battle />} />
           <Route path="leaderBoard" element={<LeaderBoard />} />
-          <Route path="singleChat" element={<SingleChat />} />
+          <Route path="singleChat/:conversationId" element={<SingleChat />} />
         </Route>
         <Route path="/" element={<NavigationBar beShown={false} />}>
           <Route path="/login" element={<Login />} />

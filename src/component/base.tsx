@@ -2,12 +2,27 @@ import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
+import { useEffect, useState } from "react";
 import "./index.scss";
+import apiClient from "@/middlewares/axiosInterceptors";
+import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
+import { CURRENT_IP } from "@/ipconfig";
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 interface NavBarProps {
   beShown: boolean;
 }
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
+  const [lastConversationId, setLastConversationId] = useState("");
+  useEffect(() => {
+    apiClient.get(`http://${CURRENT_IP}/api/conversations`).then((res) => {
+      const data = res as unknown as Chat[];
+      if (data.length > 0) {
+        setLastConversationId(data[0].conversation_id);
+      } else {
+        setLastConversationId("all");
+      }
+    });
+  }, [lastConversationId]);
   if (beShown === false) {
     return (
       <div>
@@ -34,7 +49,7 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
           const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
-            chat: "/singleChat",
+            chat: `/singleChat/${lastConversationId}`,
           };
           const itemKey = props.itemKey as NavItemKey;
           return (

@@ -13,7 +13,7 @@ export function getBaseUrl() {
   return baseUrl;
 }
 const config = {
-  apiUrl: getBaseUrl,
+  apiUrl: getBaseUrl(),
 };
 
 export default config;

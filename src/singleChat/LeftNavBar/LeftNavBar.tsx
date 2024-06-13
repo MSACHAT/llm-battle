@@ -8,6 +8,7 @@ import {
 } from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
+import { CURRENT_IP } from "@/ipconfig";
 
 export type Chat = {
   conversation_id: string;
@@ -91,13 +92,10 @@ export const LeftNavBar = ({
                   }),
                 );
                 console.log(inputTitle);
-                apiClient.patch(
-                  "http://172.10.21.42:8087/api/conversation/title",
-                  {
-                    conversation_id: conversation_id,
-                    title: inputTitle,
-                  },
-                );
+                apiClient.patch(`http://${CURRENT_IP}/api/conversation/title`, {
+                  conversation_id: conversation_id,
+                  title: inputTitle,
+                });
               }}
             />
           </Space>
@@ -121,7 +119,7 @@ export const LeftNavBar = ({
                   }),
                 );
                 apiClient.delete(
-                  `http://172.10.21.42:8087/api/conversation/${conversation_id}`,
+                  `http://${CURRENT_IP}/api/conversation/${conversation_id}`,
                 );
               }}
             >

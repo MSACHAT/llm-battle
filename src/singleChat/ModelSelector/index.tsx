@@ -1,6 +1,7 @@
 import { Select } from "@douyinfe/semi-ui";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { useEffect, useRef, useState } from "react";
+import { CURRENT_IP } from "@/ipconfig";
 
 export type model = {
   model_id: string;
@@ -28,7 +29,7 @@ export const ModelSelector = ({ defaultModel = "none" }) => {
   };
 
   useEffect(() => {
-    apiClient.get("http://172.10.21.42:8087/api/models").then((res) => {
+    apiClient.get(`http://${CURRENT_IP}/api/models`).then((res) => {
       if (Array.isArray(res)) {
         currentModels.current = res.map((model) => {
           return {
@@ -59,6 +60,7 @@ export const ModelSelector = ({ defaultModel = "none" }) => {
       prefix={"当前模型:"}
       style={{ width: 180 }}
       optionList={options}
+      defaultOpen={true}
     />
   );
 };
