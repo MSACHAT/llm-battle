@@ -1,89 +1,159 @@
-import axios from "axios";
-import { Toast } from "@douyinfe/semi-ui";
-import config from "../config/config";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import config from "@/config/config";
 
-const apiClient = axios.create({
-  baseURL: config.apiUrl,
-  timeout: 1000 * 60,
-});
-apiClient.interceptors.request.use((config) => {
-  // eslint-disable-next-line no-undef
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-    config.headers["Content-Type"] = "application/json";
-  } else {
-    console.log("NO TOKEN!!!");
+// 创建泛型接口，用于定义 API 响应数据结构
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: any;
+  config: AxiosRequestConfig;
+}
+
+// 创建 APIClient 类，封装 Axios 实例和请求方法
+class APIClient {
+  private client: AxiosInstance;
+
+  constructor(baseURL: string) {
+    this.client = axios.create({
+      baseURL,
+      timeout: 1000 * 60,
+    });
+
+    // 添加请求拦截器
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.client.interceptors.request.use(this.handleRequest, (error) =>
+      Promise.reject(error),
+    );
+
+    // 添加响应拦截器
+    this.client.interceptors.response.use(this.handleSuccess, this.handleError);
   }
-  return config;
-});
 
-apiClient.interceptors.response.use(
-  (response) => {
-    return response.data;
-  },
-  (error) => {
-    if (error.response.data.errorMessage != null) {
-      Toast.error(error.response.data.errorMessage);
+  // 请求拦截器处理函数
+  private handleRequest(config: AxiosRequestConfig<any>): AxiosRequestConfig {
+    const token = localStorage.getItem("token");
+    if (token) {
+      if (!config.headers) {
+        config.headers = {};
+      }
+      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers["Content-Type"] = "application/json";
     } else {
-      const errorStatus = error.response.status;
+      console.log("NO TOKEN!!!");
+    }
+    return config;
+  }
+
+  // 响应拦截器处理函数
+  private handleSuccess<T>(response: AxiosResponse<ApiResponse<T>>): T {
+    return response.data.data;
+  }
+
+  // 处理错误
+  private handleError(error: any): Promise<never> {
+    const errorStatus = error.response?.status;
+
+    if (errorStatus) {
       switch (errorStatus) {
         case 400:
-          Toast.error("请求错误");
+          console.error("请求错误");
           break;
         case 401:
-          Toast.error("未授权");
+          console.error("未授权");
           break;
         case 403:
           // eslint-disable-next-line no-undef
           localStorage.removeItem("token");
-          Toast.error("禁止访问");
+          console.error("禁止访问");
           break;
         case 404:
-          Toast.error("找不到资源");
+          console.error("找不到资源");
           break;
         case 405:
-          Toast.error("方法不允许");
+          console.error("方法不允许");
           break;
         case 408:
-          Toast.error("请求超时");
+          console.error("请求超时");
           break;
         case 409:
-          Toast.error("此用户已存在");
+          console.error("此用户已存在");
           break;
         case 413:
-          Toast.error("有效负载太大");
+          console.error("有效负载太大");
           break;
         case 414:
-          Toast.error("URL太长");
+          console.error("URL太长");
           break;
         case 429:
-          Toast.error("太多请求");
+          console.error("太多请求");
           break;
         case 500:
-          Toast.error("内部服务器错误");
+          console.error("内部服务器错误");
           break;
         case 501:
-          Toast.error("未实现");
+          console.error("未实现");
           break;
         case 502:
-          Toast.error("网关错误");
+          console.error("网关错误");
           break;
         case 503:
-          Toast.error("服务不可用");
+          console.error("服务不可用");
           break;
         case 504:
-          Toast.error("网关超时");
+          console.error("网关超时");
           break;
         case 505:
-          Toast.error("HTTP版本不受支持");
+          console.error("HTTP版本不受支持");
           break;
         default:
           console.error("其他错误状态码:", error.response.status);
+          break;
       }
+    } else {
+      console.error("请求失败:", error.message);
     }
-    return Promise.reject(error.response.status);
-  },
-);
+
+    return Promise.reject(error);
+  }
+
+  // GET 请求方法
+  public get<T>(url: string, params?: any): Promise<T> {
+    return this.client
+      .get<ApiResponse<T>>(url, { params })
+      .then(this.handleSuccess)
+      .catch(this.handleError);
+  }
+
+  // POST 请求方法
+  public post<T>(url: string, data?: any): Promise<T> {
+    return this.client
+      .post<ApiResponse<T>>(url, data)
+      .then(this.handleSuccess)
+      .catch(this.handleError);
+  }
+
+  // PUT 请求方法
+  public put<T>(url: string, data?: any): Promise<T> {
+    return this.client
+      .put<ApiResponse<T>>(url, data)
+      .then(this.handleSuccess)
+      .catch(this.handleError);
+  }
+
+  // DELETE 请求方法
+  public delete<T>(url: string): Promise<T> {
+    return this.client
+      .delete<ApiResponse<T>>(url)
+      .then(this.handleSuccess)
+      .catch(this.handleError);
+  }
+
+  // 其他 HTTP 方法可以类似实现
+}
+
+// 使用方法示例
+const apiClient = new APIClient(config.apiUrl);
 
 export default apiClient;

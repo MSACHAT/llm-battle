@@ -6,6 +6,10 @@ export interface Message {
   id: number;
 }
 
+export type ModelModel = {
+  model_name: string;
+  _id: string;
+};
 export type ConversationMode = "text" | "image";
 
 export type StrategyMode = "polling" | "random";

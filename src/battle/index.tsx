@@ -1,12 +1,13 @@
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
 import { BattleComponent } from "./components/BattleComponent";
-import { Button, Input, Space, Spin, TextArea } from "@douyinfe/semi-ui";
+import { Button, Space, Spin, TextArea } from "@douyinfe/semi-ui";
 import { useState, useCallback } from "react";
-import { Message } from "@/interface";
+import { Message, ModelModel } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
 import config from "@/config/config";
 import { ModelText } from "@/component/utils";
+import apiClient from "@/middlewares/axiosInterceptors";
 interface StreamMessages {
   [key: string]: string;
 }
@@ -30,7 +31,11 @@ export const Battle = () => {
   );
   const [newRoundLoading, setNewRoundLoading] = useState(false);
   const [modelNames, setModelNames] = useState(["模型A", "模型B"]);
-  const [knownModels, setKnownModels] = useState(["chatgpt", "kimi"]);
+  const [knownModels, setKnownModels] = useState<ModelModel[]>([
+    { model_name: "chatgpt", _id: "1" },
+    { model_name: "kimi", _id: "1" },
+  ]);
+  const [battle_id, setBattle_id] = useState("");
   const stopGenerate = useCallback(() => {
     controller?.abort?.();
     setMessages((msgs) => {
@@ -62,9 +67,20 @@ export const Battle = () => {
     );
     setMessages(models.reduce((acc, model) => ({ ...acc, [model]: [] }), {}));
     setNewRoundLoading(false);
+    setKnownModels([]);
   };
 
+  const create_battle = async () => {
+    return await apiClient.post<string>("/api/battle/create").then((res) => {
+      setBattle_id(res);
+      return res;
+    });
+  };
   const sendTextChatMessages = async (content: string) => {
+    let battle_id_t = battle_id;
+    if (!battle_id_t) {
+      battle_id_t = await create_battle();
+    }
     const input: Message = {
       type: "query",
       content,
@@ -92,10 +108,11 @@ export const Battle = () => {
           Accept: "*/*",
           Host: "api.coze.com",
           Connection: "keep-alive",
+          Authorization: localStorage.getItem("token") || "",
         },
         body: JSON.stringify({
           content_type: "text",
-          conversation_id: "1",
+          battle_id_t,
           query: content,
         }),
         signal: abortController.signal,
@@ -237,7 +254,12 @@ export const Battle = () => {
         <Battles />
       )}
       {messages[models[0]].filter((x) => x.type === "reply").length > 0 && (
-        <VoteComponent />
+        <VoteComponent
+          battle_id={battle_id}
+          onVoteFinish={(models) => {
+            setKnownModels(models);
+          }}
+        />
       )}
       <div className={"input-area"}>
         <TextArea
