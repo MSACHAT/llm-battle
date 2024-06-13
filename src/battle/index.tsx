@@ -11,11 +11,10 @@ import apiClient from "@/middlewares/axiosInterceptors";
 interface StreamMessages {
   [key: string]: string;
 }
-
 interface Messages {
   [key: string]: Message[];
 }
-const models = ["model_a", "model_b"]; // 模型列表
+const models = ["模型A", "模型B"]; // 模型列表
 export const Battle = () => {
   const [text, setText] = useState("");
   const [controller, setController] = useState<any>(null);
@@ -30,7 +29,6 @@ export const Battle = () => {
     models.reduce((acc, model) => ({ ...acc, [model]: [] }), {} as Messages),
   );
   const [newRoundLoading, setNewRoundLoading] = useState(false);
-  const [modelNames, setModelNames] = useState(["模型A", "模型B"]);
   const [knownModels, setKnownModels] = useState<ModelModel[]>([
     { model_name: "chatgpt", _id: "1" },
     { model_name: "kimi", _id: "1" },
@@ -38,6 +36,13 @@ export const Battle = () => {
   const [battle_id, setBattle_id] = useState("");
   const stopGenerate = useCallback(() => {
     controller?.abort?.();
+    if (!battle_id) {
+      return;
+    }
+    setNewRoundLoading(true);
+    apiClient.post("/api/battle/break_message", { battle_id }).then(() => {
+      setNewRoundLoading(false);
+    });
     setMessages((msgs) => {
       const newMessages = { ...msgs };
       models.forEach((model) => {
@@ -148,9 +153,7 @@ export const Battle = () => {
                 shouldBreak = true;
                 return;
               }
-              const modelKey = models.includes(obj.model)
-                ? obj.model
-                : models[0];
+              const modelKey = obj.model === "model_a" ? models[0] : models[1];
               tempMessages[modelKey] += obj.message.content;
               setStreamMessages((prev) => ({
                 ...prev,
@@ -231,11 +234,8 @@ export const Battle = () => {
           loading={answering}
           title={
             <Space>
-              <Title heading={6}>{modelNames[index]}</Title>
-              <ModelText
-                detail={{ text: knownModels?.[index] }}
-                isTitle={true}
-              />
+              <Title heading={6}>{models[index]}</Title>
+              <ModelText model={knownModels?.[index]} isTitle={true} />
             </Space>
           }
         />
