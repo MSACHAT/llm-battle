@@ -141,7 +141,7 @@ export const SingleChat = () => {
       .get(
         `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
       )
-      .then((res) => {
+      .then((res: any) => {
         console.log(res);
         if (res.data) {
           setMoreChatHistory(res.data);
@@ -183,7 +183,7 @@ export const SingleChat = () => {
       .get(
         `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
       )
-      .then((res) => {
+      .then((res: any) => {
         if (res.data) {
           newData = [...res.data, ...newData];
           setTimeout(() => setMoreChatHistory(newData), 1500);
