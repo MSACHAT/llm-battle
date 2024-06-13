@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { LeaderBoard } from "../../leaderBoard";
+import { LeaderBoard } from "@/leaderBoard";
 
 const meta = {
   title: "LeaderBoard/LeaderBoard",

@@ -1,10 +1,36 @@
-import { Typography, Avatar } from "@douyinfe/semi-ui";
+import { Typography } from "@douyinfe/semi-ui";
 import { Select, Table } from "@douyinfe/semi-ui";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
+import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 
-const data = [
+interface DataItem {
+  ratingSystem?: string;
+  category?: string;
+  lastUpdated?: string;
+  arena_table?: ArenaTableEntry[];
+  dataSource?: string;
+}
+
+interface ArenaTableEntry {
+  "Rank* (UB)": string;
+  Model: string;
+  Elo: number;
+  "95% CI": string;
+  Votes: number;
+  Organization: string;
+  License: string;
+  "Knowledge Cutoff Date": string;
+}
+
+interface Option {
+  value: number;
+  label: string;
+  otherKey: number;
+}
+
+const data: DataItem[] = [
   {
     ratingSystem: "elo",
     category: "full",
@@ -327,26 +353,29 @@ const data = [
     ],
   },
 ];
-const list = data.map((i, index) => ({
+
+const list: Option[] = data.map((i, index) => ({
   value: index,
-  label: i.category,
+  label: i.category!,
   otherKey: index,
 }));
+
 const columns = [
   { title: "Rank* (UB)", dataIndex: "Rank* (UB)" },
   { title: "Model", dataIndex: "Model" },
   { title: "Elo", dataIndex: "Elo" },
-  { title: "95% CI", dataIndex: "96% CI" },
+  { title: "95% CI", dataIndex: "95% CI" },
   { title: "Votes", dataIndex: "Votes" },
   { title: "Organization", dataIndex: "Organization" },
   { title: "License", dataIndex: "License" },
   { title: "Knowledge Cutoff Date", dataIndex: "Knowledge Cutoff Date" },
 ];
-const triggerRender = ({ value }) => {
+
+const triggerRender = (props: TriggerRenderProps): ReactNode => {
   return (
     <div
       style={{
-        minWidth: "112",
+        minWidth: "112px",
         backgroundColor: "rgba(255, 255, 255, 0.05)",
         display: "flex",
         alignItems: "center",
@@ -368,35 +397,31 @@ const triggerRender = ({ value }) => {
           justifyContent: "space-between",
         }}
       >
-        <text>{value.map((item) => item.label).join(" , ")}</text>
+        <span>{props.value.map((item) => item.label).join(" , ")}</span>
         <IconChevronDown style={{ marginRight: 8, flexShrink: 0 }} />
       </div>
     </div>
   );
 };
 
-export const LeaderBoard = () => {
-  const [category, setCategory] = useState(0);
-  const [val, setVal] = useState(0);
+export const LeaderBoard: React.FC = () => {
+  const [category, setCategory] = useState<number>(0);
+  const [val, setVal] = useState<number>(0);
   const { Title, Text } = Typography;
   const body = document.body;
   body.setAttribute("theme-mode", "dark");
-  const handleRow = (record, index) => {
-    // 给偶数行设置斑马纹
-    if (index % 2 === 0) {
-      return {
-        style: {
-          background: "rgba(255, 255, 255, 0.05)",
-        },
-      };
-    } else {
-      return {};
-    }
+  const handleRow = (record: any, index: number | undefined) => {
+    return {
+      style:
+        index !== undefined && index % 2 === 0
+          ? { background: "rgba(255, 255, 255, 0.05)" }
+          : {},
+    };
   };
   return (
     <div className={styles.leaderBoard}>
       <Title
-        heading={4}
+        heading={2}
         className={styles.title}
         style={{ marginBottom: "40px" }}
       >
@@ -408,7 +433,7 @@ export const LeaderBoard = () => {
         量表显示模型评级。您可以在我们的论文中找到更多详细信息。
       </Text>
       <Title
-        heading={4}
+        heading={2}
         className={styles.title}
         style={{ marginBottom: "24px" }}
       >
@@ -428,9 +453,9 @@ export const LeaderBoard = () => {
               outline: 0,
             }}
             optionList={list}
-            onChange={(value: number) => {
-              setCategory(value);
-              setVal(value);
+            onChange={(value) => {
+              setCategory(value as number);
+              setVal(value as number);
             }}
           ></Select>
         </div>
