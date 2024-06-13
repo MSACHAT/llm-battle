@@ -16,7 +16,7 @@ export const ModelText = ({
       heading={6}
       link
       onClick={() => {
-        window.open("/singleChat");
+        window.open("/singleChat/1"); //TODO change
       }}
     >
       {model.model_name}
@@ -25,7 +25,7 @@ export const ModelText = ({
     <Text
       link
       onClick={() => {
-        navi("/singleChat");
+        navi("/singleChat/1"); //TODO change
       }}
     >
       {model.model_name}

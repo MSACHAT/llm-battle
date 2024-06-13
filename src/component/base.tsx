@@ -48,7 +48,8 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
           const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
-            chat: `/singleChat/${lastConversationId}`,
+            // chat: `/singleChat/${lastConversationId}`,
+            chat: `/singleChat/1`, //TODO 修改
           };
           const itemKey = props.itemKey as NavItemKey;
           return (
