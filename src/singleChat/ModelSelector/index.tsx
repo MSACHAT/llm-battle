@@ -60,6 +60,7 @@ export const ModelSelector = ({ defaultModel = "none" }) => {
       prefix={"当前模型:"}
       style={{ width: 180 }}
       optionList={options}
+      defaultOpen={true}
     />
   );
 };

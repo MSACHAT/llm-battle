@@ -117,6 +117,8 @@ export const SingleChat = () => {
             console.log(resData);
             setMoreChatHistory(resData.data);
             totalPages.current = resData.totalPages;
+          } else {
+            setMoreChatHistory([]);
           }
         }
       });
@@ -157,6 +159,7 @@ export const SingleChat = () => {
       setChatHistory([]);
       setUserInput("");
       setIsSending(false);
+      setMoreChatHistory([]);
       isNewChat.current = true;
       setChats([
         {
