@@ -26,9 +26,6 @@ class APIClient {
     this.client.interceptors.request.use(this.handleRequest, (error) =>
       Promise.reject(error),
     );
-
-    // 添加响应拦截器
-    this.client.interceptors.response.use(this.handleSuccess, this.handleError);
   }
 
   // 请求拦截器处理函数
