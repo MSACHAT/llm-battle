@@ -4,6 +4,9 @@ import { ReactNode, useState } from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
+import { Link } from "react-router-dom";
+import Text from "@douyinfe/semi-ui/lib/es/typography/text";
+import { ModelText } from "@/component/utils";
 
 interface DataItem {
   ratingSystem?: string;
@@ -362,7 +365,11 @@ const list: Option[] = data.map((i, index) => ({
 
 const columns = [
   { title: "Rank* (UB)", dataIndex: "Rank* (UB)" },
-  { title: "Model", dataIndex: "Model" },
+  {
+    title: "Model",
+    dataIndex: "Model",
+    render: (text: string) => <ModelText detail={{ text }} />,
+  },
   { title: "Elo", dataIndex: "Elo" },
   { title: "95% CI", dataIndex: "95% CI" },
   { title: "Votes", dataIndex: "Votes" },
