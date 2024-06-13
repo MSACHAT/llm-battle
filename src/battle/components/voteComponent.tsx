@@ -37,7 +37,7 @@ const VoteComponent = ({
     children: ReactNode;
   }) => (
     <Button
-      theme={"solid"}
+      theme={["leftvote", "rightvote"].includes(type) ? "solid" : "light"}
       disabled={flag}
       onClick={() => {
         apiClient
@@ -66,10 +66,10 @@ const VoteComponent = ({
   );
   return (
     <div className="button-container">
-      <VoteButton type={"leftvote"}>👈左边好些</VoteButton>
-      <VoteButton type={"rightvote"}>👉右边好些</VoteButton>
+      <VoteButton type={"leftvote"}>A更好</VoteButton>
       <VoteButton type={"tievote"}>平局</VoteButton>
       <VoteButton type={"bothbad_vote"}>都不好</VoteButton>
+      <VoteButton type={"rightvote"}>B更好</VoteButton>
     </div>
   );
 };
