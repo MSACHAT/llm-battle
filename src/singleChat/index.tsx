@@ -5,6 +5,7 @@ import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
+import { CURRENT_IP } from "@/ipconfig";
 
 type ChatMessage = {
   content: string;
@@ -83,7 +84,7 @@ export const SingleChat = () => {
   const [botModel, setBotModel] = useState<string>("");
   useEffect(() => {
     apiClient
-      .get("http://172.10.21.42:8087/api/conversations")
+      .get(`http://${CURRENT_IP}/api/conversations`)
       .then(async (res) => {
         const data = res as unknown as Chat[];
         console.log(data);
@@ -106,11 +107,12 @@ export const SingleChat = () => {
           setChats(data);
           console.log(currConversationId.current);
           const res = await apiClient.get(
-            `http://172.10.21.42:8087/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+            `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
           );
           console.log(res);
           const resData = res as unknown as MessageListResponse;
           if (resData) {
+            console.log(resData);
             setMoreChatHistory(resData.data);
             totalPages.current = resData.totalPages;
           }
@@ -132,7 +134,7 @@ export const SingleChat = () => {
     setPageNum(0);
     apiClient
       .get(
-        `http://172.10.21.42:8087/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
+        `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
       )
       .then((res) => {
         console.log(res);
@@ -173,7 +175,7 @@ export const SingleChat = () => {
     let newData = [...moreChatHistory];
     apiClient
       .get(
-        `http://172.10.21.42:8087/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
       )
       .then((res) => {
         if (res.data) {
@@ -190,22 +192,19 @@ export const SingleChat = () => {
     try {
       setIsSending(true);
       setButtonContent("终止");
-      const res = await fetch(
-        "http://172.10.21.42:8087/api/conversation/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "*/*",
-            Connection: "keep-alive",
-          },
-          body: JSON.stringify({
-            content_type: "text",
-            conversation_id: currConversationId.current,
-            query: msg,
-          }),
+      const res = await fetch(`http://${CURRENT_IP}/api/conversation/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "*/*",
+          Connection: "keep-alive",
         },
-      );
+        body: JSON.stringify({
+          content_type: "text",
+          conversation_id: currConversationId.current,
+          query: msg,
+        }),
+      });
 
       if (!res.ok) {
         return new Response(res.body, {
@@ -351,7 +350,7 @@ export const SingleChat = () => {
             <div ref={bottomRef} />
             <div className={"chat-history-list-content"}>
               <div className={"more-chat-history"}>
-                {[...moreChatHistory].reverse().map((record) => {
+                {[...moreChatHistory].map((record) => {
                   if (record.role === "user") {
                     return <UserQuery query={record.content} />;
                   } else {
@@ -399,7 +398,7 @@ export const SingleChat = () => {
                   console.log(currModelName);
                   apiClient
                     .post(
-                      "http://172.10.21.42:8087/api/conversation/create_conversation",
+                      `http://${CURRENT_IP}/api/conversation/create_conversation`,
                       { model_name: currModelName },
                     )
                     .then((res) => {
