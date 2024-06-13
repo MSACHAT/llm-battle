@@ -6,6 +6,7 @@ import { useState, useCallback } from "react";
 import { Message } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
 import config from "@/config/config";
+import { ModelText } from "@/component/utils";
 interface StreamMessages {
   [key: string]: string;
 }
@@ -29,6 +30,7 @@ export const Battle = () => {
   );
   const [newRoundLoading, setNewRoundLoading] = useState(false);
   const [modelNames, setModelNames] = useState(["模型A", "模型B"]);
+  const [knownModels, setKnownModels] = useState(["chatgpt", "kimi"]);
   const stopGenerate = useCallback(() => {
     controller?.abort?.();
     setMessages((msgs) => {
@@ -210,7 +212,15 @@ export const Battle = () => {
           messages={messages[model]}
           streamMessage={streamMessages[model]}
           loading={answering}
-          title={modelNames[index]}
+          title={
+            <Space>
+              <Title heading={6}>{modelNames[index]}</Title>
+              <ModelText
+                detail={{ text: knownModels?.[index] }}
+                isTitle={true}
+              />
+            </Space>
+          }
         />
       ))}
     </div>
@@ -257,11 +267,14 @@ export const Battle = () => {
           {answering ? "终止输出" : "发送"}
         </Button>
       </div>
-      <div className={"new-round"}>
-        <Button theme="solid" onClick={newRound}>
-          开始新一轮
-        </Button>
-      </div>
+      {(messages[models[0]].filter((x) => x.type === "reply").length > 0 ||
+        answering) && (
+        <div className={"new-round"}>
+          <Button theme="solid" onClick={newRound}>
+            开始新一轮
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

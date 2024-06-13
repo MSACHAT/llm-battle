@@ -2,27 +2,30 @@ import MessageBox from "./MessageBox";
 import { Message } from "@/interface";
 import "../index.scss";
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
+import { ReactNode } from "react";
 
 export const BattleComponent = ({
   messages,
   streamMessage,
   loading,
   title,
+  key,
 }: {
   messages: Message[];
   streamMessage: string;
   loading: boolean;
-  title: string;
+  title: ReactNode;
+  key: number;
 }) => {
   return (
     <div className={"battle-single-chat"}>
-      <Title heading={6}>{title}</Title>
+      {title}
       <div className={"single-chat-area"}>
         <MessageBox
           streamMessage={streamMessage}
           messages={messages}
           loading={loading}
-          title={title}
+          key={key}
         />
       </div>
     </div>

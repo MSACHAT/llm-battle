@@ -42,8 +42,8 @@ const MessageBox: FC<{
   streamMessage: string;
   messages: Message[];
   loading: boolean;
-  title: string;
-}> = ({ streamMessage, messages, loading, title }) => {
+  key: number;
+}> = ({ streamMessage, messages, loading, key }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -58,7 +58,7 @@ const MessageBox: FC<{
 
   return (
     <div
-      id={"content" + title}
+      id={"content" + key}
       ref={contentRef}
       style={{ overflowY: "auto", maxHeight: "100%" }}
     >
