@@ -147,6 +147,13 @@ class APIClient {
       .catch(this.handleError);
   }
 
+  public patch<T>(url: string, data?: any): Promise<T> {
+    return this.client
+      .patch<T>(url)
+      .then(this.handleSuccess)
+      .catch(this.handleError);
+  }
+
   // 其他 HTTP 方法可以类似实现
 }
 
