@@ -8,7 +8,6 @@ import {
 } from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
-import { CURRENT_IP } from "@/ipconfig";
 
 export type Chat = {
   conversation_id: string;
@@ -92,7 +91,7 @@ export const LeftNavBar = ({
                   }),
                 );
                 console.log(inputTitle);
-                apiClient.patch(`http://${CURRENT_IP}/api/conversation/title`, {
+                apiClient.patch(`/api/conversation/title`, {
                   conversation_id: conversation_id,
                   title: inputTitle,
                 });
@@ -118,9 +117,7 @@ export const LeftNavBar = ({
                     return chat.conversation_id !== conversation_id;
                   }),
                 );
-                apiClient.delete(
-                  `http://${CURRENT_IP}/api/conversation/${conversation_id}`,
-                );
+                apiClient.delete(`/api/conversation/${conversation_id}`);
               }}
             >
               确定删除

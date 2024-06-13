@@ -5,7 +5,6 @@ import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
-import { CURRENT_IP } from "@/ipconfig";
 import { useNavigate } from "react-router";
 
 type ChatMessage = {
@@ -85,43 +84,41 @@ export const SingleChat = () => {
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
   useEffect(() => {
-    apiClient
-      .get(`http://${CURRENT_IP}/api/conversations`)
-      .then(async (res) => {
-        const data = res as unknown as Chat[];
-        console.log(data);
-        if (data.length === 0) {
-          isNewChat.current = true;
-          setChats([
-            {
-              title: "New Chat",
-              conversation_id: "",
-              last_message_time: NaN,
-              bot_name: "",
-            },
-          ]);
+    apiClient.get(`/api/conversations`).then(async (res) => {
+      const data = res as unknown as Chat[];
+      console.log(data);
+      if (data.length === 0) {
+        isNewChat.current = true;
+        setChats([
+          {
+            title: "New Chat",
+            conversation_id: "",
+            last_message_time: NaN,
+            bot_name: "",
+          },
+        ]);
+      } else {
+        console.log("NOT A NEW CHAT !");
+        isNewChat.current = false;
+        currConversationId.current = data
+          .sort((a, b) => b.last_message_time - a.last_message_time)
+          .at(0)?.conversation_id;
+        setChats(data);
+        console.log(currConversationId.current);
+        const res = await apiClient.get(
+          `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        );
+        console.log(res);
+        const resData = res as unknown as MessageListResponse;
+        if (resData) {
+          console.log(resData);
+          setMoreChatHistory(resData.data);
+          totalPages.current = resData.totalPages;
         } else {
-          console.log("NOT A NEW CHAT !");
-          isNewChat.current = false;
-          currConversationId.current = data
-            .sort((a, b) => b.last_message_time - a.last_message_time)
-            .at(0)?.conversation_id;
-          setChats(data);
-          console.log(currConversationId.current);
-          const res = await apiClient.get(
-            `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
-          );
-          console.log(res);
-          const resData = res as unknown as MessageListResponse;
-          if (resData) {
-            console.log(resData);
-            setMoreChatHistory(resData.data);
-            totalPages.current = resData.totalPages;
-          } else {
-            setMoreChatHistory([]);
-          }
+          setMoreChatHistory([]);
         }
-      });
+      }
+    });
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string) {
@@ -139,7 +136,7 @@ export const SingleChat = () => {
     setPageNum(0);
     apiClient
       .get(
-        `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
+        `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
       )
       .then((res: any) => {
         console.log(res);
@@ -181,7 +178,7 @@ export const SingleChat = () => {
     let newData = [...moreChatHistory];
     apiClient
       .get(
-        `http://${CURRENT_IP}/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
       )
       .then((res: any) => {
         if (res.data) {
@@ -198,7 +195,7 @@ export const SingleChat = () => {
     try {
       setIsSending(true);
       setButtonContent("终止输出");
-      const res = await fetch(`http://${CURRENT_IP}/api/conversation/chat`, {
+      const res = await fetch(`/api/conversation/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -404,10 +401,9 @@ export const SingleChat = () => {
                   setBotModel(currModelName);
                   console.log(currModelName);
                   apiClient
-                    .post(
-                      `http://${CURRENT_IP}/api/conversation/create_conversation`,
-                      { model_name: currModelName },
-                    )
+                    .post(`/api/conversation/create_conversation`, {
+                      model_name: currModelName,
+                    })
                     .then((res) => {
                       const data = res as unknown as ApiResponse;
                       currConversationId.current = data.conversation_id;
