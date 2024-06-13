@@ -6,6 +6,7 @@ import "./index.scss";
 import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { CURRENT_IP } from "@/ipconfig";
+import { useNavigate } from "react-router";
 
 type ChatMessage = {
   content: string;
@@ -82,6 +83,7 @@ export const SingleChat = () => {
   const [pageNum, setPageNum] = useState(0);
   const totalPages = useRef(0);
   const [botModel, setBotModel] = useState<string>("");
+  const navigate = useNavigate();
   useEffect(() => {
     apiClient
       .get(`http://${CURRENT_IP}/api/conversations`)
@@ -121,6 +123,7 @@ export const SingleChat = () => {
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string) {
+    navigate(`/singleChat/${conversation_id}`);
     if (isNewChat.current) {
       setChats(
         chats.filter((chat) => {

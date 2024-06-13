@@ -20,7 +20,7 @@ function App() {
       <Route path="/" element={<NavigationBar />}>
         <Route path="battle" element={<Battle />} />
         <Route path="leaderBoard" element={<LeaderBoard />} />
-        <Route path="singleChat" element={<SingleChat />} />
+        <Route path="singleChat/:conversationId" element={<SingleChat />} />
       </Route>,
     ),
   );

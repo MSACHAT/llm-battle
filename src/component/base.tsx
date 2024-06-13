@@ -2,10 +2,25 @@ import { Avatar, Dropdown, Nav, Space } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
+import apiClient from "@/middlewares/axiosInterceptors";
+import { CURRENT_IP } from "@/ipconfig";
+import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
+import { useEffect, useState } from "react";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 
 export const NavigationBar = () => {
+  const [lastConversationId, setLastConversationId] = useState("");
+  useEffect(() => {
+    apiClient.get(`http://${CURRENT_IP}/api/conversations`).then((res) => {
+      const data = res as unknown as Chat[];
+      if (data.length > 0) {
+        setLastConversationId(data[0].conversation_id);
+      } else {
+        setLastConversationId("all");
+      }
+    });
+  }, [lastConversationId]);
   return (
     <div>
       <Nav
@@ -18,7 +33,7 @@ export const NavigationBar = () => {
           const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
-            chat: "/singleChat",
+            chat: `/singleChat/${lastConversationId}`,
           };
           const itemKey = props.itemKey as NavItemKey;
           return (
