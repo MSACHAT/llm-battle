@@ -1,7 +1,7 @@
 import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
 import { BattleComponent } from "./components/BattleComponent";
-import { Button, Input, Space, Spin } from "@douyinfe/semi-ui";
+import { Button, Input, Space, Spin, TextArea } from "@douyinfe/semi-ui";
 import { useState, useCallback } from "react";
 import { Message } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
@@ -23,7 +23,7 @@ export const Battle = () => {
       {} as StreamMessages,
     ),
   );
-  const [loading, setLoading] = useState(false);
+  const [answering, setAnswering] = useState(false);
   const [messages, setMessages] = useState<Messages>(
     models.reduce((acc, model) => ({ ...acc, [model]: [] }), {} as Messages),
   );
@@ -78,7 +78,7 @@ export const Battle = () => {
       return newMessages;
     });
     setText("");
-    setLoading(true);
+    setAnswering(true);
 
     try {
       const abortController = new AbortController();
@@ -198,7 +198,7 @@ export const Battle = () => {
       });
     } finally {
       setController(null);
-      setLoading(false);
+      setAnswering(false);
     }
   };
 
@@ -209,7 +209,7 @@ export const Battle = () => {
           key={index}
           messages={messages[model]}
           streamMessage={streamMessages[model]}
-          loading={loading}
+          loading={answering}
           title={modelNames[index]}
         />
       ))}
@@ -229,19 +229,30 @@ export const Battle = () => {
       {messages[models[0]].filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent />
       )}
-      <Input
-        autoFocus
-        placeholder={
-          "在这里输入问题，按Enter发送，你会得到模型的不同答案并可以为它们投票"
-        }
-        value={text}
-        onChange={(v) => setText(v)}
-        onEnterPress={async () => {
-          stopGenerate();
-          await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
-          sendTextChatMessages(text);
-        }}
-      />
+      <div className={"input-area"}>
+        <TextArea
+          autosize
+          rows={1}
+          autoFocus
+          placeholder={
+            "在这里输入问题，按回车键（Enter）发送，你会得到模型的不同答案并可以为它们投票"
+          }
+          value={text}
+          onChange={(v) => setText(v)}
+          onEnterPress={async () => {
+            stopGenerate();
+            await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+            sendTextChatMessages(text);
+          }}
+        />
+        <Button
+          theme="solid"
+          className={"battle-send-button"}
+          onClick={stopGenerate}
+        >
+          {answering ? "终止输出" : "发送"}
+        </Button>
+      </div>
       <div className={"new-round"}>
         <Button theme="solid" onClick={newRound}>
           开始新一轮

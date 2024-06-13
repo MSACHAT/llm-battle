@@ -1,4 +1,4 @@
-import { Avatar, Button, Input } from "@douyinfe/semi-ui";
+import { Avatar, Button, Input, TextArea } from "@douyinfe/semi-ui";
 import React, { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
@@ -189,7 +189,7 @@ export const SingleChat = () => {
   const query = async (msg: string) => {
     try {
       setIsSending(true);
-      setButtonContent("终止");
+      setButtonContent("终止输出");
       const res = await fetch(
         "http://172.10.21.42:8087/api/conversation/chat",
         {
@@ -370,15 +370,16 @@ export const SingleChat = () => {
           </InfiniteScroll>
         </div>
         <div className={"user-input"}>
-          <Input
+          <TextArea
+            autosize
+            rows={1}
+            autoFocus
             value={userInput}
-            onChange={(value: string, e: React.ChangeEvent<HTMLInputElement>) =>
-              setUserInput(value)
-            }
-            className={"input-area"}
-          ></Input>
+            onChange={(value: string) => setUserInput(value)}
+          ></TextArea>
           <Button
             className={"send-button"}
+            theme="solid"
             onClick={() => {
               if (!isSending) {
                 const currModelName =

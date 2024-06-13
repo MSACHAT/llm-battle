@@ -58,8 +58,16 @@
     padding: 10px; /* 可选：增加按钮内边距，使其更美观 */
     box-sizing: border-box; /* 确保 padding 不会影响按钮的宽度 */
   }
-  .semi-input-wrapper {
+  .input-area {
     margin-top: 40px;
+    display: flex;
+    gap: 56px;
+    .semi-input-textarea {
+      margin-top: 10px;
+    }
+    .battle-send-button {
+      width: 136px;
+    }
   }
   .new-round {
     display: flex;

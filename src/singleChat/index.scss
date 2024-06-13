@@ -83,30 +83,16 @@
     justify-content: space-between;
 
     .user-input {
-      padding-bottom: 4vh;
-      border-bottom: 1px rgb(51, 53, 67) solid;
+      margin-top: 40px;
       padding-left: 4vw;
       padding-right: 4vw;
-      box-sizing: border-box;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-
+      gap: 56px;
       .send-button {
-        width: 7vw;
-        height: 6vh;
-        background-color: rgba(245, 201, 80, 1);
-        font-family: PingFang SC, sans-serif;
-        color: rgba(3, 2, 2, 1);
-        font-size: 16px;
-        font-weight: 600;
-        text-align: left;
-
+        height:56px;
       }
-
-      .input-area {
-        width: 59vw;
-        height: 6vh;
+      .semi-input-textarea {
+        margin-top: 10px;
       }
     }
   }
