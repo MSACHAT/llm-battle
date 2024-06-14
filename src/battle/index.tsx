@@ -129,7 +129,7 @@ export const Battle = () => {
       const reader = stream?.getReader();
       const decoder = new TextDecoder();
       const tempMessages: StreamMessages = models.reduce(
-        (acc, model) => ({ ...acc, [model]: "" }),
+        (acc, model) => ({ ...acc, [model]: undefined }),
         {},
       );
       let shouldBreak = false;
@@ -156,6 +156,12 @@ export const Battle = () => {
                 return;
               }
               const modelKey = obj.model === "model_a" ? models[0] : models[1];
+              if (obj.code && obj.msg) {
+                tempMessages[0] = obj.msg;
+                tempMessages[1] = obj.msg;
+                shouldBreak = true;
+                return;
+              }
               tempMessages[modelKey] += obj.message.content;
               setStreamMessages((prev) => ({
                 ...prev,
@@ -226,6 +232,22 @@ export const Battle = () => {
     }
   };
 
+  const handleKeyDown = async (event: {
+    key: string;
+    shiftKey: any;
+    preventDefault: () => void;
+  }) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault(); // 阻止默认的换行行为
+      if (!text) {
+        return;
+      }
+      stopGenerate();
+      await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+      sendTextChatMessages(text);
+    }
+  };
+
   const Battles = () => (
     <div className={"battles"}>
       {models.map((model, index) => (
@@ -244,7 +266,7 @@ export const Battle = () => {
       ))}
     </div>
   );
-
+  console.log(messages);
   return (
     <div className={"battle-page"}>
       <Title heading={5}>开始对战</Title>
@@ -273,14 +295,7 @@ export const Battle = () => {
           }
           value={text}
           onChange={(v) => setText(v)}
-          onEnterPress={async () => {
-            if (!text) {
-              return;
-            }
-            stopGenerate();
-            await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
-            sendTextChatMessages(text);
-          }}
+          onEnterPress={handleKeyDown}
         />
         <Button
           disabled={!text.length && !answering}

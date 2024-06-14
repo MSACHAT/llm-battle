@@ -33,7 +33,7 @@ export const Login = ({ isRegister: isRegisterOrigin = false }) => {
         if (res && res.data) {
           !isRegister && Toast.success("登录成功");
           localStorage.setItem("token", res.data);
-          navigate("feed");
+          navigate("/battle");
           setLoginResult(true);
         } else {
           setLoginResult(false);

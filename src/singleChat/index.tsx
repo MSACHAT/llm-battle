@@ -6,6 +6,7 @@ import "./index.scss";
 import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
+import config from "@/config/config";
 
 type ChatMessage = {
   content: string;
@@ -195,7 +196,7 @@ export const SingleChat = () => {
     try {
       setIsSending(true);
       setButtonContent("终止输出");
-      const res = await fetch(`/api/conversation/chat`, {
+      const res = await fetch(`${config.apiUrl}/api/conversation/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -319,6 +320,54 @@ export const SingleChat = () => {
     };
   }, []);
 
+  const sendMessage = () => {
+    const currModelName = localStorage.getItem("current_model_name");
+    canAutoScrollRef.current = true;
+    setChatHistory((prevHistory) => [
+      ...prevHistory,
+      {
+        content: userInput,
+        role: "user",
+        message_id: "",
+        content_type: "text",
+      },
+    ]);
+    setUserInput("");
+    if (isNewChat.current && currModelName) {
+      setBotModel(currModelName);
+      console.log(currModelName);
+      apiClient
+        .post(`/api/conversation/create_conversation`, {
+          model_name: currModelName,
+        })
+        .then((res) => {
+          const data = res as unknown as ApiResponse;
+          currConversationId.current = data.conversation_id;
+          query(userInput);
+        });
+    } else {
+      query(userInput);
+    }
+  };
+  const handleKeyDown = async (event: {
+    key: string;
+    shiftKey: any;
+    preventDefault: () => void;
+  }) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault(); // 阻止默认的换行行为
+      if (!userInput) {
+        return;
+      }
+      if (isSending) {
+        setIsSending(false);
+        await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+        sendMessage();
+      } else {
+        sendMessage();
+      }
+    }
+  };
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
@@ -378,42 +427,15 @@ export const SingleChat = () => {
             autoFocus
             value={userInput}
             onChange={(value: string) => setUserInput(value)}
+            onEnterPress={handleKeyDown}
           ></TextArea>
           <Button
             className={"send-button"}
             theme="solid"
             onClick={() => {
               if (!isSending) {
-                const currModelName =
-                  localStorage.getItem("current_model_name");
-                canAutoScrollRef.current = true;
-                setChatHistory((prevHistory) => [
-                  ...prevHistory,
-                  {
-                    content: userInput,
-                    role: "user",
-                    message_id: "",
-                    content_type: "text",
-                  },
-                ]);
-                setUserInput("");
-                if (isNewChat.current && currModelName) {
-                  setBotModel(currModelName);
-                  console.log(currModelName);
-                  apiClient
-                    .post(`/api/conversation/create_conversation`, {
-                      model_name: currModelName,
-                    })
-                    .then((res) => {
-                      const data = res as unknown as ApiResponse;
-                      currConversationId.current = data.conversation_id;
-                      query(userInput);
-                    });
-                } else {
-                  query(userInput);
-                }
+                sendMessage();
               } else {
-                console.log("发送结束请求");
                 setIsSending(false);
               }
             }}

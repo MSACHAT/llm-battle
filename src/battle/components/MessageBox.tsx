@@ -21,7 +21,7 @@ const BotReply = ({
           <Spin size={"middle"} style={{ marginBottom: -8 }} />
         ) : (
           <>
-            {content}
+            {content || "未知错误"}
             {loading ? <BlinkingCursor /> : ""}
           </>
         )}
