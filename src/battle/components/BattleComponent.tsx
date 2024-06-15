@@ -1,7 +1,6 @@
 import MessageBox from "./MessageBox";
 import { Message } from "@/interface";
 import "../index.scss";
-import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import { ReactNode } from "react";
 
 export const BattleComponent = ({

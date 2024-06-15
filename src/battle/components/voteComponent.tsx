@@ -5,6 +5,7 @@ import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import apiClient from "@/middlewares/axiosInterceptors";
 import axios, { AxiosResponse } from "axios";
 import { ModelModel } from "@/interface";
+
 const VoteComponent = ({
   battle_id,
   onVoteFinish,

@@ -7,11 +7,12 @@ export function getBaseUrl() {
     baseUrl = "http://172.10.21.42:8087";
   } else {
     // 在生产环境下使用不同的URL
-    baseUrl = "http://43.138.41.24:8085";
+    baseUrl = "http://43.138.41.24:8087";
   }
 
   return baseUrl;
 }
+
 const config = {
   apiUrl: getBaseUrl(),
 };

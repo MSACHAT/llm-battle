@@ -1,4 +1,4 @@
-import { Avatar, Button, Input, TextArea } from "@douyinfe/semi-ui";
+import { Avatar, Button, TextArea } from "@douyinfe/semi-ui";
 import React, { useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
@@ -424,7 +424,7 @@ export const SingleChat = () => {
           <TextArea
             autosize
             rows={1}
-            autoFocus
+            autoFocus={true}
             value={userInput}
             onChange={(value: string) => setUserInput(value)}
             onEnterPress={handleKeyDown}

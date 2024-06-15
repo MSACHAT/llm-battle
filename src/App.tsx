@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import {
   createBrowserRouter,
   createRoutesFromElements,
-  Route,
-  RouterProvider,
   Navigate,
   Outlet,
+  Route,
+  RouterProvider,
 } from "react-router-dom";
 import { Battle } from "./battle/index";
 import { LeaderBoard } from "./leaderBoard/index";
@@ -17,6 +17,7 @@ const PrivateRoute = () => {
   const token = localStorage.getItem("token");
   return token ? <Outlet /> : <Navigate to="/login" />;
 };
+
 function App() {
   useEffect(() => {
     const body = document.body;

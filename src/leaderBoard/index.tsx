@@ -1,10 +1,8 @@
-import { Typography } from "@douyinfe/semi-ui";
-import { Select, Table } from "@douyinfe/semi-ui";
+import { Select, Table, Typography } from "@douyinfe/semi-ui";
 import { ReactNode, useState } from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
-import { Link } from "react-router-dom";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
 

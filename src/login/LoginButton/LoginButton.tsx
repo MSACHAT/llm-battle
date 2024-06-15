@@ -1,5 +1,5 @@
-import { Avatar, Button, Input, List } from "@douyinfe/semi-ui";
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { Button } from "@douyinfe/semi-ui";
+import { ReactNode, useState } from "react";
 import "./LoginButton.scss";
 
 interface LoginButtonProps {
@@ -26,9 +26,11 @@ export const LoginButton: React.FC<LoginButtonProps> = ({
       message: string;
       status: string;
     }
+
     interface LoginResData {
       token: string;
     }
+
     const fake_res = {
       data: {
         token: "abcdefg",

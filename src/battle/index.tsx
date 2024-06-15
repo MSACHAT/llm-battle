@@ -2,18 +2,21 @@ import Title from "@douyinfe/semi-ui/lib/es/typography/title";
 import "./index.scss";
 import { BattleComponent } from "./components/BattleComponent";
 import { Button, Space, Spin, TextArea } from "@douyinfe/semi-ui";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Message, ModelModel } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
 import config from "@/config/config";
 import { ModelText } from "@/component/utils";
 import apiClient from "@/middlewares/axiosInterceptors";
+
 interface StreamMessages {
   [key: string]: string;
 }
+
 interface Messages {
   [key: string]: Message[];
 }
+
 const models = ["模型A", "模型B"]; // 模型列表
 export const Battle = () => {
   const [text, setText] = useState("");

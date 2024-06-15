@@ -1,9 +1,7 @@
-import { Input, Spin, Toast } from "@douyinfe/semi-ui";
-import { Typography } from "@douyinfe/semi-ui";
-import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import { Divider, Input, Toast, Typography } from "@douyinfe/semi-ui";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
-import { Divider } from "@douyinfe/semi-ui";
 import axios from "axios";
 import config from "@/config/config";
 import { LoginButton } from "@/login/LoginButton/LoginButton";

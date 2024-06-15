@@ -6,10 +6,13 @@ import { useEffect, useState } from "react";
 import "./index.scss";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
+
 type NavItemKey = "battle" | "leaderBoard" | "chat";
+
 interface NavBarProps {
   beShown: boolean;
 }
+
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const [lastConversationId, setLastConversationId] = useState("");
   useEffect(() => {

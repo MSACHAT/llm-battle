@@ -2,9 +2,9 @@
   padding: 56px 140px;
   display: flex;
   flex-direction: column;
-  height:calc(100vh - 200px); // 占据整个视口高度
+  height: calc(100vh - 200px); // 占据整个视口高度
   .battles {
-    padding:52px 0 25px 0;
+    padding: 52px 0 25px 0;
     width: 100%;
     display: flex;
     flex: 1; // 占据剩余空间
@@ -22,9 +22,11 @@
         overflow-y: auto; // 内容可以垂直滚动
         border-radius: 20px;
         padding: 32px 40px 32px 40px;
-        .message-container{
+
+        .message-container {
           margin-bottom: 12px;
         }
+
         .cursor {
           display: inline-block;
           width: 2px;
@@ -46,6 +48,7 @@
       }
     }
   }
+
   .button-container {
     display: flex;
     width: 100%;
@@ -53,29 +56,35 @@
     justify-content: space-between;
     margin-top: 25px;
   }
+
   .button-container button {
     flex: 1; /* 让按钮均分可用空间 */
     padding: 10px; /* 可选：增加按钮内边距，使其更美观 */
     box-sizing: border-box; /* 确保 padding 不会影响按钮的宽度 */
   }
+
   .input-area {
     margin-top: 40px;
     display: flex;
     gap: 56px;
+
     .semi-input-textarea {
       margin-top: 10px;
     }
+
     .battle-send-button {
       width: 136px;
     }
   }
+
   .new-round {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 28px;
+
     .semi-button {
-      width:383px;
+      width: 383px;
     }
   }
 
