@@ -3,10 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - feat/ci/test
+      - main
+      - develop
   pull_request:
     branches:
-      - feat/ci/test
+      - main
+      - develop
 
 jobs:
   build:
