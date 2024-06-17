@@ -14,18 +14,7 @@ export const Login = ({ isRegister: isRegisterOrigin = false }) => {
   const [loginResult, setLoginResult] = useState<boolean | null>(null);
 
   const handleLogin = async (status: boolean) => {
-    const data = {
-      username,
-      password: passwd,
-    };
-    if (isRegister) {
-      const res = await axios.post(config.apiUrl + "/user/register", data);
-      if (res && res.data) {
-        Toast.success("注册成功");
-      } else {
-        Toast.error("注册失败，请重试");
-      }
-    } else {
+    const login = async () => {
       try {
         const res = await axios.post(config.apiUrl + "/user/login", data);
         if (res && res.data) {
@@ -39,6 +28,21 @@ export const Login = ({ isRegister: isRegisterOrigin = false }) => {
       } catch (error) {
         setLoginResult(false);
       }
+    };
+    const data = {
+      username,
+      password: passwd,
+    };
+    if (isRegister) {
+      const res = await axios.post(config.apiUrl + "/user/register", data);
+      if (res && res.data) {
+        Toast.success("注册成功");
+        login();
+      } else {
+        Toast.error("注册失败，请重试");
+      }
+    } else {
+      login();
     }
   };
 
