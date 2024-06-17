@@ -135,7 +135,7 @@ export const SingleChat = () => {
         }),
       );
     }
-    // currConversationId = conversation_id;
+    currConversationId = conversation_id;
     console.log(conversation_id);
     setIsSending(false);
     setPageNum(0);
@@ -391,7 +391,7 @@ export const SingleChat = () => {
         </div>
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll
-            endMessage={"没有更多数据了"}
+            endMessage={"--"}
             dataLength={moreChatHistory.length}
             scrollableTarget={"chat-history-list"}
             loader={<p className="text-center m-5">⏳&nbsp;Loading...</p>}
