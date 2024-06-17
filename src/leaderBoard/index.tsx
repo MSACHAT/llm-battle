@@ -426,9 +426,9 @@ export const LeaderBoard: React.FC = () => {
           : {},
     };
   };
-  useEffect(() => {
-    apiClient.get(``); //暂留明天改
-  }, []);
+  // useEffect(() => {
+  //   apiClient.get(``); //暂留明天改
+  // }, []);
   return (
     <div className={styles.leaderBoard}>
       <Title
