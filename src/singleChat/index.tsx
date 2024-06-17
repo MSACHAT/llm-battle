@@ -338,6 +338,7 @@ export const SingleChat = () => {
     ]);
     setUserInput("");
     if (isNewChat.current && currModelName) {
+      isNewChat.current = false;
       setBotModel(currModelName);
       console.log(currModelName);
       apiClient
