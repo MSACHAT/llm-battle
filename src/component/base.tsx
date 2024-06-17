@@ -2,10 +2,8 @@ import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./index.scss";
-import apiClient from "@/middlewares/axiosInterceptors";
-import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 

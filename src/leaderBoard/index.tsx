@@ -1,11 +1,10 @@
 import { Select, Table, Typography } from "@douyinfe/semi-ui";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
-import apiClient from "@/middlewares/axiosInterceptors";
 
 interface DataItem {
   ratingSystem?: string;
