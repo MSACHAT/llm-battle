@@ -85,6 +85,7 @@ export const SingleChat = () => {
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
   let { currConversationId } = useParams();
+  console.log(currConversationId);
   useEffect(() => {
     apiClient.get(`/api/conversations`).then(async (res) => {
       const data = res as unknown as Chat[];
@@ -114,7 +115,7 @@ export const SingleChat = () => {
         );
         console.log(res);
         const resData = res as unknown as MessageListResponse;
-        if (resData) {
+        if (resData.data) {
           console.log(resData);
           setMoreChatHistory(resData.data);
           totalPages.current = resData.totalPages;

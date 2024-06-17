@@ -15,16 +15,16 @@ interface NavBarProps {
 
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const [lastConversationId, setLastConversationId] = useState("");
-  useEffect(() => {
-    apiClient.get(`/api/conversations`).then((res) => {
-      const data = res as unknown as Chat[];
-      if (data.length > 0) {
-        setLastConversationId(data[0].conversation_id);
-      } else {
-        setLastConversationId("all");
-      }
-    });
-  }, [lastConversationId]);
+  // useEffect(() => {
+  //   apiClient.get(`/api/conversations`).then((res) => {
+  //     const data = res as unknown as Chat[];
+  //     if (data.length > 0) {
+  //       setLastConversationId(data[0].conversation_id);
+  //     } else {
+  //       setLastConversationId("all");
+  //     }
+  //   });
+  // }, [lastConversationId]);
   if (beShown === false) {
     return (
       <div>
