@@ -25,7 +25,6 @@ function App() {
   }, []);
 
   const token = localStorage.getItem("token");
-
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
@@ -37,7 +36,10 @@ function App() {
           <Route path="/" element={<NavigationBar beShown={true} />}>
             <Route path="battle" element={<Battle />} />
             <Route path="leaderBoard" element={<LeaderBoard />} />
-            <Route path="singleChat/:conversationId" element={<SingleChat />} />
+            <Route
+              path="singleChat/:currConversationId"
+              element={<SingleChat />}
+            />
           </Route>
         </Route>
         <Route path="/" element={<NavigationBar beShown={false} />}>
