@@ -32,10 +32,7 @@ export const Battle = () => {
     models.reduce((acc, model) => ({ ...acc, [model]: [] }), {} as Messages),
   );
   const [loading, setLoading] = useState(false);
-  const [knownModels, setKnownModels] = useState<ModelModel[]>([
-    { model_name: "chatgpt", _id: "1" },
-    { model_name: "kimi", _id: "1" },
-  ]);
+  const [knownModels, setKnownModels] = useState<ModelModel[]>([]);
   const [battle_id, setBattle_id] = useState("");
   const stopGenerate = useCallback(() => {
     if (!battle_id) {
@@ -132,7 +129,7 @@ export const Battle = () => {
       const reader = stream?.getReader();
       const decoder = new TextDecoder();
       const tempMessages: StreamMessages = models.reduce(
-        (acc, model) => ({ ...acc, [model]: undefined }),
+        (acc, model) => ({ ...acc, [model]: "" }),
         {},
       );
       let shouldBreak = false;
@@ -262,7 +259,9 @@ export const Battle = () => {
           title={
             <Space>
               <Title heading={6}>{models[index]}</Title>
-              <ModelText model={knownModels?.[index]} isTitle={true} />
+              {knownModels.length > 0 && (
+                <ModelText model={knownModels?.[index]} isTitle={true} />
+              )}
             </Space>
           }
         />
