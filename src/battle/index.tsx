@@ -129,7 +129,7 @@ export const Battle = () => {
       const reader = stream?.getReader();
       const decoder = new TextDecoder();
       const tempMessages: StreamMessages = models.reduce(
-        (acc, model) => ({ ...acc, [model]: undefined }),
+        (acc, model) => ({ ...acc, [model]: "" }),
         {},
       );
       let shouldBreak = false;
