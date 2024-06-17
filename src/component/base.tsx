@@ -52,7 +52,7 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
             // chat: `/singleChat/${lastConversationId}`,
-            chat: `/singleChat/1`, //TODO 修改
+            chat: `/singleChat/all`, //TODO 修改
           };
           const itemKey = props.itemKey as NavItemKey;
           return (

@@ -7,6 +7,7 @@ import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
 import config from "@/config/config";
+import { useParams } from "react-router-dom";
 
 type ChatMessage = {
   content: string;
@@ -78,12 +79,12 @@ export const SingleChat = () => {
   const canAutoScrollRef = useRef(true);
   const [moreChatHistory, setMoreChatHistory] = useState<ChatMessage[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
-  const currConversationId = useRef<undefined | string>(undefined);
   const isNewChat = useRef(false);
   const [pageNum, setPageNum] = useState(0);
   const totalPages = useRef(0);
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
+  let { currConversationId } = useParams();
   useEffect(() => {
     apiClient.get(`/api/conversations`).then(async (res) => {
       const data = res as unknown as Chat[];
@@ -101,13 +102,15 @@ export const SingleChat = () => {
       } else {
         console.log("NOT A NEW CHAT !");
         isNewChat.current = false;
-        currConversationId.current = data
-          .sort((a, b) => b.last_message_time - a.last_message_time)
-          .at(0)?.conversation_id;
+        if (currConversationId === "all") {
+          currConversationId = data
+            .sort((a, b) => b.last_message_time - a.last_message_time)
+            .at(0)?.conversation_id;
+        }
         setChats(data);
-        console.log(currConversationId.current);
+        console.log(currConversationId);
         const res = await apiClient.get(
-          `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+          `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=${pageNum}`,
         );
         console.log(res);
         const resData = res as unknown as MessageListResponse;
@@ -131,13 +134,13 @@ export const SingleChat = () => {
         }),
       );
     }
-    currConversationId.current = conversation_id;
+    // currConversationId = conversation_id;
     console.log(conversation_id);
     setIsSending(false);
     setPageNum(0);
     apiClient
       .get(
-        `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=0`,
+        `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=0`,
       )
       .then((res: any) => {
         console.log(res);
@@ -179,7 +182,7 @@ export const SingleChat = () => {
     let newData = [...moreChatHistory];
     apiClient
       .get(
-        `/api/conversation/${currConversationId.current}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=${pageNum}`,
       )
       .then((res: any) => {
         if (res.data) {
@@ -205,7 +208,7 @@ export const SingleChat = () => {
         },
         body: JSON.stringify({
           content_type: "text",
-          conversation_id: currConversationId.current,
+          conversation_id: currConversationId,
           query: msg,
         }),
       });
@@ -342,7 +345,7 @@ export const SingleChat = () => {
         })
         .then((res) => {
           const data = res as unknown as ApiResponse;
-          currConversationId.current = data.conversation_id;
+          currConversationId = data.conversation_id;
           query(userInput);
         });
     } else {
@@ -375,7 +378,7 @@ export const SingleChat = () => {
           <BotModelContext.Provider value={{ botModel, setBotModel }} />
           <LeftNavBar
             chats={chats}
-            chosenChatId={isNewChat.current ? "" : currConversationId.current}
+            chosenChatId={isNewChat.current ? "" : currConversationId}
           />
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>

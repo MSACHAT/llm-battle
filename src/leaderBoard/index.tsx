@@ -1,10 +1,11 @@
 import { Select, Table, Typography } from "@douyinfe/semi-ui";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
+import apiClient from "@/middlewares/axiosInterceptors";
 
 interface DataItem {
   ratingSystem?: string;
@@ -425,6 +426,9 @@ export const LeaderBoard: React.FC = () => {
           : {},
     };
   };
+  useEffect(() => {
+    apiClient.get(``); //暂留明天改
+  }, []);
   return (
     <div className={styles.leaderBoard}>
       <Title
