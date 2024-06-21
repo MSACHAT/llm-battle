@@ -2,8 +2,10 @@ import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
 import { Link, Outlet } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.scss";
+import apiClient from "@/middlewares/axiosInterceptors";
+import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 
@@ -13,16 +15,16 @@ interface NavBarProps {
 
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const [lastConversationId, setLastConversationId] = useState("");
-  // useEffect(() => {
-  //   apiClient.get(`/api/conversations`).then((res) => {
-  //     const data = res as unknown as Chat[];
-  //     if (data.length > 0) {
-  //       setLastConversationId(data[0].conversation_id);
-  //     } else {
-  //       setLastConversationId("all");
-  //     }
-  //   });
-  // }, [lastConversationId]);
+  useEffect(() => {
+    apiClient.get(`/api/conversations`).then((res) => {
+      const data = res as unknown as Chat[];
+      if (data.length > 0) {
+        setLastConversationId(data[0].conversation_id);
+      } else {
+        setLastConversationId("none");
+      }
+    });
+  }, [lastConversationId]);
   if (beShown === false) {
     return (
       <div>
@@ -49,8 +51,8 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
           const routerMap: Record<NavItemKey, string> = {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
-            // chat: `/singleChat/${lastConversationId}`,
-            chat: `/singleChat/all`, //TODO 修改
+            chat: `/singleChat?chat_id=${lastConversationId}`,
+            // chat: `/singleChat/all`, //TODO 修改
           };
           const itemKey = props.itemKey as NavItemKey;
           return (
