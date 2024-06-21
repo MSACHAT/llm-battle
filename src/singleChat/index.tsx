@@ -85,7 +85,6 @@ export const SingleChat = () => {
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
   let { currConversationId } = useParams();
-  console.log(currConversationId);
   useEffect(() => {
     apiClient.get(`/api/conversations`).then(async (res) => {
       const data = res as unknown as Chat[];
@@ -166,7 +165,7 @@ export const SingleChat = () => {
       isNewChat.current = true;
       setChats([
         {
-          title: "New Chat",
+          title: "New Chat ,j,sdahfkjashd asdkjahsd jkjh",
           conversation_id: "",
           last_message_time: NaN,
           bot_name: "",
