@@ -1,13 +1,15 @@
 import { Select, Table, Typography } from "@douyinfe/semi-ui";
-import { ReactNode, useState } from "react";
+import {ReactNode, useEffect, useState} from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
+import axios from "axios";
+import config from "@/config/config";
 
 interface DataItem {
-  ratingSystem?: string;
+
   category?: string;
   lastUpdated?: string;
   arena_table?: ArenaTableEntry[];
@@ -15,14 +17,14 @@ interface DataItem {
 }
 
 interface ArenaTableEntry {
-  "Rank* (UB)": string;
-  Model: string;
-  Elo: number;
-  "95% CI": string;
-  Votes: number;
-  Organization: string;
-  License: string;
-  "Knowledge Cutoff Date": string;
+  rank: string;
+  model: string;
+  elo: number;
+  ci: string;
+  votes: number;
+  organization: string;
+  license: string;
+  knowledgeCutoff: string;
 }
 
 interface Option {
@@ -31,51 +33,51 @@ interface Option {
   otherKey: number;
 }
 
-const data: DataItem[] = [
+/*const data: DataItem[] = [
   {
-    ratingSystem: "elo",
+    dataSource: "bt",
     category: "full",
     lastUpdated: "2024-05-27 21:55:57 PDT",
     arena_table: [
       {
-        "Rank* (UB)": "1",
-        Model: "GPT-4o",
-        Elo: 1013,
-        "95% CI": "+30/-30",
-        Votes: 209,
-        Organization: "OpenAI",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-10",
+        rank: "1",
+        model: "GPT-4o",
+        elo: 1013,
+        ci: "+30/-30",
+        votes: 209,
+        organization: "OpenAI",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-10",
       },
       {
-        "Rank* (UB)": "2",
-        Model: "Gemini-1.5 pro",
-        Elo: 1009,
-        "95% CI": "+42/-39",
-        Votes: 172,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "2",
+        model: "Gemini-1.5 pro",
+        elo: 1009,
+        ci: "+42/-39",
+        votes: 172,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
       {
-        "Rank* (UB)": "3",
-        Model: "GPT-4",
-        Elo: 1009,
-        "95% CI": "+41/-37",
-        Votes: 189,
-        Organization: "OpenAI",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-04",
+        rank: "3",
+        model: "GPT-4",
+        elo: 1009,
+        ci: "+41/-37",
+        votes: 189,
+        organization: "OpenAI",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-04",
       },
       {
-        "Rank* (UB)": "4",
-        Model: "Gemini-1.5 flash",
-        Elo: 1007,
-        "95% CI": "+35/-27",
-        Votes: 216,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "4",
+        model: "Gemini-1.5 flash",
+        elo: 1007,
+        ci: "+35/-27",
+        votes: 216,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
     ],
   },
@@ -85,44 +87,44 @@ const data: DataItem[] = [
     lastUpdated: "2024-05-27 09:25:49 PDT",
     arena_table: [
       {
-        "Rank* (UB)": "1",
-        Model: "Gemini-1.5 flash",
-        Elo: 1053,
-        "95% CI": "+74/-53",
-        Votes: 45,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "1",
+        model: "Gemini-1.5 flash",
+        elo: 1053,
+        ci: "+74/-53",
+        votes: 45,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
       {
-        "Rank* (UB)": "2",
-        Model: "Gemini-1.5 pro",
-        Elo: 1044,
-        "95% CI": "+95/-83",
-        Votes: 41,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "2",
+        model: "Gemini-1.5 pro",
+        elo: 1044,
+        ci: "+95/-83",
+        votes: 41,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
       {
-        "Rank* (UB)": "3",
-        Model: "GPT-4o",
-        Elo: 1014,
-        "95% CI": "+70/-74",
-        Votes: 40,
-        Organization: "OpenAI",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-10",
+        rank: "3",
+        model: "GPT-4o",
+        elo: 1014,
+        ci: "+70/-74",
+        votes: 40,
+        organization: "OpenAI",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-10",
       },
       {
-        "Rank* (UB)": "4",
-        Model: "GPT-4",
-        Elo: 1008,
-        "95% CI": "+75/-71",
-        Votes: 48,
-        Organization: "Proprietary",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-04",
+        rank: "4",
+        model: "GPT-4",
+        elo: 1008,
+        ci: "+75/-71",
+        votes: 48,
+        organization: "Proprietary",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-04",
       },
     ],
   },
@@ -132,70 +134,66 @@ const data: DataItem[] = [
     lastUpdated: "2024-05-27 21:55:57 PDT",
     arena_table: [
       {
-        "Rank* (UB)": "1",
-        Model: "Gemini-1.5 flash",
-        Elo: 1053,
-        "95% CI": "+42/-36",
-        Votes: 45,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "1",
+        model: "Gemini-1.5 flash",
+        elo: 1053,
+        ci: "+42/-36",
+        votes: 45,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
       {
-        "Rank* (UB)": "2",
-        Model: "Gemini-1.5 pro",
-        Elo: 1019,
-        "95% CI": "+48/-38",
-        Votes: 41,
-        Organization: "Google",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-11",
+        rank: "2",
+        model: "Gemini-1.5 pro",
+        elo: 1019,
+        ci: "+48/-38",
+        votes: 41,
+        organization: "Google",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-11",
       },
       {
-        "Rank* (UB)": "3",
-        Model: "GPT-4o",
-        Elo: 1012,
-        "95% CI": "+40/-39",
-        Votes: 40,
-        Organization: "OpenAI",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-10",
+        rank: "3",
+        model: "GPT-4o",
+        elo: 1012,
+        ci: "+40/-39",
+        votes: 40,
+        organization: "OpenAI",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-10",
       },
       {
-        "Rank* (UB)": "4",
-        Model: "GPT-4",
-        Elo: 1011,
-        "95% CI": "+44/-24",
-        Votes: 48,
-        Organization: "Proprietary",
-        License: "Proprietary",
-        "Knowledge Cutoff Date": "2023-04",
+        rank: "4",
+        model: "GPT-4",
+        elo: 1011,
+        ci: "+44/-24",
+        votes: 48,
+        organization: "Proprietary",
+        license: "Proprietary",
+        knowledgeCutoff: "2023-04",
       },
     ],
   },
-];
+];*/
 
-const list: Option[] = data.map((i, index) => ({
-  value: index,
-  label: i.category!,
-  otherKey: index,
-}));
+
 
 const columns = [
-  { title: "Rank* (UB)", dataIndex: "Rank* (UB)" },
+  { title: "Rank* (UB)", dataIndex: "rank" },
   {
     title: "Model",
-    dataIndex: "Model",
+    dataIndex: "model",
     render: (model_name: string) => (
       <ModelText model={{ model_name, _id: "1" }} />
     ),
   },
-  { title: "Elo", dataIndex: "Elo" },
-  { title: "95% CI", dataIndex: "95% CI" },
-  { title: "Votes", dataIndex: "Votes" },
-  { title: "Organization", dataIndex: "Organization" },
-  { title: "License", dataIndex: "License" },
-  { title: "Knowledge Cutoff Date", dataIndex: "Knowledge Cutoff Date" },
+  { title: "Elo", dataIndex: "elo" },
+  { title: "95% CI", dataIndex: "ci" },
+  { title: "Votes", dataIndex: "votes" },
+  { title: "Organization", dataIndex: "organization" },
+  { title: "License", dataIndex: "license" },
+  { title: "Knowledge Cutoff Date", dataIndex: "knowledgeCutoff" },
 ];
 
 const triggerRender = (props: TriggerRenderProps): ReactNode => {
@@ -232,6 +230,9 @@ const triggerRender = (props: TriggerRenderProps): ReactNode => {
 };
 
 export const LeaderBoard: React.FC = () => {
+  const [listOptions, setListOptions] = useState<Option[]>([]);
+
+  const [data,setData] = useState<DataItem[]>([])
   const [category, setCategory] = useState<number>(0);
   const [val, setVal] = useState<number>(0);
   const { Title, Text } = Typography;
@@ -245,9 +246,28 @@ export const LeaderBoard: React.FC = () => {
           : {},
     };
   };
-  // useEffect(() => {
-  //   apiClient.get(``); //暂留明天改
-  // }, []);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get(config.apiUrl+"/api/v1/arena_table");
+        setData(response.data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const options = data.map((i, index) => ({
+      value: index,
+      label: i.category ?? "N/A",
+      otherKey: index,
+    }));
+    setListOptions(options)
+  }, [data]);
+
   return (
     <div className={styles.leaderBoard}>
       <Title
@@ -282,7 +302,7 @@ export const LeaderBoard: React.FC = () => {
               marginTop: 20,
               outline: 0,
             }}
-            optionList={list}
+            optionList={listOptions}
             onChange={(value) => {
               setCategory(value as number);
               setVal(value as number);
