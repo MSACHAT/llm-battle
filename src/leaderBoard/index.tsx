@@ -1,13 +1,15 @@
-import { Select, Table, Typography } from "@douyinfe/semi-ui";
-import { ReactNode, useState } from "react";
+import {Select, Spin, Table, Typography} from "@douyinfe/semi-ui";
+import {ReactNode, useEffect, useState} from "react";
 import styles from "./index.module.scss";
 import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
+import axios from "axios";
+import config from "@/config/config";
 
 interface DataItem {
-  
+
   category?: string;
   lastUpdated?: string;
   arena_table?: ArenaTableEntry[];
@@ -31,7 +33,7 @@ interface Option {
   otherKey: number;
 }
 
-const data: DataItem[] = [
+/*const data: DataItem[] = [
   {
     dataSource: "bt",
     category: "full",
@@ -173,13 +175,9 @@ const data: DataItem[] = [
       },
     ],
   },
-];
+];*/
 
-const list: Option[] = data.map((i, index) => ({
-  value: index,
-  label: i.category!,
-  otherKey: index,
-}));
+
 
 const columns = [
   { title: "Rank* (UB)", dataIndex: "rank" },
@@ -232,6 +230,10 @@ const triggerRender = (props: TriggerRenderProps): ReactNode => {
 };
 
 export const LeaderBoard: React.FC = () => {
+  const [listOptions, setListOptions] = useState<Option[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [data,setData] = useState<DataItem[]>([])
   const [category, setCategory] = useState<number>(0);
   const [val, setVal] = useState<number>(0);
   const { Title, Text } = Typography;
@@ -245,9 +247,31 @@ export const LeaderBoard: React.FC = () => {
           : {},
     };
   };
-  // useEffect(() => {
-  //   apiClient.get(``); //暂留明天改
-  // }, []);
+  useEffect(() => {
+    setIsLoading(true)
+    async function fetchData() {
+      try {
+        const response = await axios.get(config.apiUrl + "/api/v1/arena_table");
+        setData(response.data);
+
+
+        const options = response.data.map((i: { category: any; }, index: any) => ({
+          value: index,
+          label: i.category ?? "N/A",
+          otherKey: index,
+        }));
+        setListOptions(options);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+
   return (
     <div className={styles.leaderBoard}>
       <Title
@@ -269,38 +293,43 @@ export const LeaderBoard: React.FC = () => {
       >
         排行榜
       </Title>
-      <div className={styles.option}>
-        <div className={styles.Classification}>
-          <Title heading={6} className={styles.title}>
-            分类
-          </Title>
-          <Select
-            value={val}
-            triggerRender={triggerRender}
-            className={styles.select}
-            style={{
-              marginTop: 20,
-              outline: 0,
-            }}
-            optionList={list}
-            onChange={(value) => {
-              setCategory(value as number);
-              setVal(value as number);
-            }}
-          ></Select>
-        </div>
-        <Title heading={6} className={styles.title}>
-          信息
-        </Title>
-      </div>
-      <div className={styles.scrollableContainer}>
-        <Table
-          columns={columns}
-          dataSource={data[category].arena_table}
-          pagination={false}
-          onRow={handleRow}
-        />
-      </div>
+      {isLoading ? (<Spin size={"large"}/>):(
+        <>
+          <div className={styles.option}>
+            <div className={styles.Classification}>
+              <Title heading={6} className={styles.title}>
+                分类
+              </Title>
+              <Select
+                value={val}
+                triggerRender={triggerRender}
+                className={styles.select}
+                style={{
+                  marginTop: 20,
+                  outline: 0,
+                }}
+                optionList={listOptions}
+                onChange={(value) => {
+                  setCategory(value as number);
+                  setVal(value as number);
+                }}
+              ></Select>
+            </div>
+            <Title heading={6} className={styles.title}>
+              信息
+            </Title>
+          </div>
+          <div className={styles.scrollableContainer}>
+            <Table
+              columns={columns}
+              dataSource={data[category].arena_table}
+              pagination={false}
+              onRow={handleRow}
+            />
+          </div>
+      </>
+      )}
+
     </div>
   );
 };

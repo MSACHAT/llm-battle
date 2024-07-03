@@ -25,7 +25,6 @@ export const LeftNavBar = ({
 }) => {
   const [currChats, setCurrChats] = useState<Chat[]>([]);
   useEffect(() => {
-    console.log(chats);
     setCurrChats(chats);
   }, [chats]);
   const { botModel } = useContext(BotModelContext);
@@ -91,6 +90,7 @@ export const LeftNavBar = ({
                   }),
                 );
                 console.log(inputTitle);
+                console.log(conversation_id);
                 apiClient.patch(`/api/conversation/title`, {
                   conversation_id: conversation_id,
                   title: inputTitle,

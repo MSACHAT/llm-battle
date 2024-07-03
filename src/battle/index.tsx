@@ -268,7 +268,6 @@ export const Battle = () => {
       ))}
     </div>
   );
-  console.log(messages);
   return (
     <div className={"battle-page"}>
       <Title heading={5}>开始对战</Title>

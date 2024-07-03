@@ -5,6 +5,7 @@ export function getBaseUrl() {
   if (process.env.NODE_ENV === "development") {
     // 在开发环境下使用localhost
     baseUrl = "http://172.10.21.42:8087";
+    //baseUrl = "http://localhost:8087";
     // baseUrl = "http://43.138.41.24:8087";
   } else {
     // 在生产环境下使用不同的URL

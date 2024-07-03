@@ -36,10 +36,7 @@ function App() {
           <Route path="/" element={<NavigationBar beShown={true} />}>
             <Route path="battle" element={<Battle />} />
             <Route path="leaderBoard" element={<LeaderBoard />} />
-            <Route
-              path="singleChat/:currConversationId"
-              element={<SingleChat />}
-            />
+            <Route path="singleChat" element={<SingleChat />} />
           </Route>
         </Route>
         <Route path="/" element={<NavigationBar beShown={false} />}>

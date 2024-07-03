@@ -84,8 +84,7 @@ export const SingleChat = () => {
   const totalPages = useRef(0);
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
-  let { currConversationId } = useParams();
-  console.log(currConversationId);
+  let { chat_id } = useParams();
   useEffect(() => {
     apiClient.get(`/api/conversations`).then(async (res) => {
       const data = res as unknown as Chat[];
@@ -103,15 +102,15 @@ export const SingleChat = () => {
       } else {
         console.log("NOT A NEW CHAT !");
         isNewChat.current = false;
-        if (currConversationId === "all") {
-          currConversationId = data
+        if (chat_id === "none") {
+          chat_id = data
             .sort((a, b) => b.last_message_time - a.last_message_time)
             .at(0)?.conversation_id;
         }
         setChats(data);
-        console.log(currConversationId);
+        console.log(chat_id);
         const res = await apiClient.get(
-          `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+          `/api/conversation/${chat_id}/get_message_list?pageSize=10&pageNum=${pageNum}`,
         );
         console.log(res);
         const resData = res as unknown as MessageListResponse;
@@ -127,7 +126,7 @@ export const SingleChat = () => {
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string) {
-    navigate(`/singleChat/${conversation_id}`);
+    navigate(`/singleChat?chat_id=${conversation_id}`);
     if (isNewChat.current) {
       setChats(
         chats.filter((chat) => {
@@ -135,14 +134,14 @@ export const SingleChat = () => {
         }),
       );
     }
-    currConversationId = conversation_id;
+    chat_id = conversation_id;
     console.log(conversation_id);
     setIsSending(false);
     setPageNum(0);
     setChatHistory([]);
     apiClient
       .get(
-        `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=0`,
+        `/api/conversation/${chat_id}/get_message_list?pageSize=10&pageNum=0`,
       )
       .then((res: any) => {
         console.log(res);
@@ -184,7 +183,7 @@ export const SingleChat = () => {
     let newData = [...moreChatHistory];
     apiClient
       .get(
-        `/api/conversation/${currConversationId}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        `/api/conversation/${chat_id}/get_message_list?pageSize=10&pageNum=${pageNum}`,
       )
       .then((res: any) => {
         if (res.data) {
@@ -210,7 +209,7 @@ export const SingleChat = () => {
         },
         body: JSON.stringify({
           content_type: "text",
-          conversation_id: currConversationId,
+          conversation_id: chat_id,
           query: msg,
         }),
       });
@@ -348,7 +347,7 @@ export const SingleChat = () => {
         })
         .then((res) => {
           const data = res as unknown as ApiResponse;
-          currConversationId = data.conversation_id;
+          chat_id = data.conversation_id;
           query(userInput);
         });
     } else {
@@ -381,7 +380,7 @@ export const SingleChat = () => {
           <BotModelContext.Provider value={{ botModel, setBotModel }} />
           <LeftNavBar
             chats={chats}
-            chosenChatId={isNewChat.current ? "" : currConversationId}
+            chosenChatId={isNewChat.current ? "" : chat_id}
           />
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>
