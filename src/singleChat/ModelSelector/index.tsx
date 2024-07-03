@@ -28,6 +28,7 @@ export const ModelSelector = ({ defaultModel = "none" }) => {
   };
 
   useEffect(() => {
+    console.log("Default:" + defaultModel);
     apiClient.get(`/api/models`).then((res) => {
       if (Array.isArray(res)) {
         currentModels.current = res.map((model) => {
@@ -53,13 +54,12 @@ export const ModelSelector = ({ defaultModel = "none" }) => {
 
   return (
     <Select
-      value={val}
       onChange={HandleOnChange}
       defaultValue={defaultModel}
       prefix={"当前模型:"}
-      style={{ width: 180 }}
+      style={{ width: 250 }}
       optionList={options}
-      defaultOpen={true}
+      defaultOpen={false}
     />
   );
 };

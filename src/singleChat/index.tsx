@@ -7,7 +7,7 @@ import { ModelSelector } from "./ModelSelector/index";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
 import config from "@/config/config";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 type ChatMessage = {
   content: string;
@@ -84,7 +84,9 @@ export const SingleChat = () => {
   const totalPages = useRef(0);
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
-  let { chat_id } = useParams();
+  const [searchParams] = useSearchParams();
+  let chat_id: string | undefined | null = searchParams.get("chat_id");
+  const model_name: string | undefined | null = searchParams.get("model_name");
   useEffect(() => {
     apiClient.get(`/api/conversations`).then(async (res) => {
       const data = res as unknown as Chat[];
@@ -100,8 +102,6 @@ export const SingleChat = () => {
           },
         ]);
       } else {
-        console.log("NOT A NEW CHAT !");
-        isNewChat.current = false;
         if (chat_id === "none") {
           chat_id = data
             .sort((a, b) => b.last_message_time - a.last_message_time)
@@ -112,10 +112,8 @@ export const SingleChat = () => {
         const res = await apiClient.get(
           `/api/conversation/${chat_id}/get_message_list?pageSize=10&pageNum=${pageNum}`,
         );
-        console.log(res);
         const resData = res as unknown as MessageListResponse;
         if (resData.data) {
-          console.log(resData);
           setMoreChatHistory(resData.data);
           totalPages.current = resData.totalPages;
         } else {
@@ -124,8 +122,28 @@ export const SingleChat = () => {
       }
     });
   }, []);
+  useEffect(() => {
+    if (
+      chats &&
+      chats[0]?.conversation_id !== "" &&
+      chat_id == "new" &&
+      model_name
+    ) {
+      setChats([
+        {
+          title: "New Chat",
+          conversation_id: "",
+          last_message_time: NaN,
+          bot_name: "",
+        },
+        ...chats,
+      ]);
+      isNewChat.current = true;
+    }
+  }, [chats]);
 
   function handleClickOnChatBlock(conversation_id: string) {
+    setIsSending(false);
     navigate(`/singleChat?chat_id=${conversation_id}`);
     if (isNewChat.current) {
       setChats(
@@ -133,6 +151,7 @@ export const SingleChat = () => {
           return chat.conversation_id !== "";
         }),
       );
+      isNewChat.current = false;
     }
     chat_id = conversation_id;
     console.log(conversation_id);
@@ -141,13 +160,12 @@ export const SingleChat = () => {
     setChatHistory([]);
     apiClient
       .get(
-        `/api/conversation/${chat_id}/get_message_list?pageSize=10&pageNum=0`,
+        `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=0`,
       )
       .then((res: any) => {
         console.log(res);
         if (res.data) {
           setMoreChatHistory(res.data);
-          // totalPages.current = res.totalPages;
           setPageNum((prevState) => prevState + 1);
         } else {
           setMoreChatHistory([]);
@@ -156,6 +174,9 @@ export const SingleChat = () => {
   }
 
   function startNewChat() {
+    if (!model_name) {
+      navigate(`/singleChat?chat_id=new`);
+    }
     if (!isNewChat.current) {
       localStorage.setItem("current_model_name", "");
       setChatHistory([]);
@@ -198,6 +219,8 @@ export const SingleChat = () => {
 
   const query = async (msg: string) => {
     try {
+      console.log(chat_id);
+      console.log(msg);
       setIsSending(true);
       setButtonContent("终止输出");
       const res = await fetch(`${config.apiUrl}/api/conversation/chat`, {
@@ -231,7 +254,7 @@ export const SingleChat = () => {
       const stream = new ReadableStream({
         async start(controller) {
           // eslint-disable-next-line no-constant-condition
-          while (true) {
+          while (isSendingRef.current) {
             const { done, value } = await reader.read();
             if (done) break;
             const decodedValue = decoder.decode(value, { stream: true });
@@ -249,7 +272,7 @@ export const SingleChat = () => {
                   : packet;
                 const obj = JSON.parse(jsonString);
 
-                if (!obj.is_finish) {
+                if (!obj.is_finish && isSendingRef.current) {
                   currentReply += obj.message.content;
                   setChatHistory((prevHistory) => {
                     const updatedHistory = [...prevHistory];
@@ -387,7 +410,11 @@ export const SingleChat = () => {
       <div className={"single-chat-content"}>
         <div style={{ alignSelf: "center" }}>
           {" "}
-          {isNewChat.current || chats.length === 0 ? <ModelSelector /> : <></>}
+          {isNewChat.current || chats.length === 0 ? (
+            <ModelSelector defaultModel={model_name as unknown as undefined} />
+          ) : (
+            <></>
+          )}
         </div>
         <div className={"chat-history-list"} id="chat-history-list">
           <InfiniteScroll
@@ -432,13 +459,14 @@ export const SingleChat = () => {
             autoFocus={true}
             value={userInput}
             onChange={(value: string) => setUserInput(value)}
-            onEnterPress={handleKeyDown}
+            onEnterPress={isSending ? undefined : handleKeyDown}
           ></TextArea>
           <Button
             className={"send-button"}
             theme="solid"
             onClick={() => {
               if (!isSending) {
+                isSendingRef.current = true;
                 sendMessage();
               } else {
                 setIsSending(false);

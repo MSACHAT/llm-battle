@@ -21,7 +21,7 @@ export const LeftNavBar = ({
   chosenChatId,
 }: {
   chats: Chat[];
-  chosenChatId: string | undefined;
+  chosenChatId: string | undefined | null;
 }) => {
   const [currChats, setCurrChats] = useState<Chat[]>([]);
   useEffect(() => {
@@ -30,7 +30,7 @@ export const LeftNavBar = ({
   const { botModel } = useContext(BotModelContext);
   const [currChatId, setCurrChatId] = useState(chosenChatId);
   const isChosen = (conversationId: string) => {
-    if (currChatId === "NEWCHAT") {
+    if (currChatId === "new") {
       return conversationId === "";
     } else if (currChatId) {
       return conversationId === currChatId;
