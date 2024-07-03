@@ -144,6 +144,8 @@ export const SingleChat = () => {
 
   function handleClickOnChatBlock(conversation_id: string) {
     setIsSending(false);
+    setChatHistory([]);
+    setMoreChatHistory([]);
     navigate(`/singleChat?chat_id=${conversation_id}`);
     if (isNewChat.current) {
       setChats(
@@ -157,7 +159,6 @@ export const SingleChat = () => {
     console.log(conversation_id);
     setIsSending(false);
     setPageNum(0);
-    setChatHistory([]);
     apiClient
       .get(
         `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=0`,
