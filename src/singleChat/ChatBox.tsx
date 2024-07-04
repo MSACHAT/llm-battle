@@ -254,7 +254,11 @@ export const ChatBox = ({
           setConversation_id(data.conversation_id);
           query(userInput, data.conversation_id);
           navigate(`/singleChat?chat_id=${data.conversation_id}`);
-          updateNewConversation(userInput.slice(0, 6), modelName); //TODO @何成 优化
+          updateNewConversation(
+            data.conversation_id,
+            userInput.slice(0, 6),
+            modelName,
+          ); //TODO @何成 优化
         });
     } else {
       query(userInput);

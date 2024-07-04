@@ -32,6 +32,7 @@ export const SingleChat = () => {
   const [searchParams] = useSearchParams();
   const [conversation_id, setConversation_id] = useState<string>();
   const [modelName, setModelName] = useState<string>();
+  const [cacheConversationId, setCacheConversationId] = useState("");
 
   useEffect(() => {
     // 获取url信息
@@ -75,6 +76,21 @@ export const SingleChat = () => {
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string, model: string) {
+    //在切换其它对话的时候把新建的conversation_id从new更新为正确id
+    if (cacheConversationId) {
+      const updatedChats = chats.map((chat) => {
+        if (chat.conversation_id === "new") {
+          return {
+            ...chat,
+            conversation_id: cacheConversationId,
+          };
+        } else {
+          return chat;
+        }
+      });
+      setCacheConversationId("");
+      setChats(updatedChats);
+    }
     setConversation_id(conversation_id);
     setModelName(model);
     navigate(`/singleChat?chat_id=${conversation_id}`);
@@ -97,7 +113,11 @@ export const SingleChat = () => {
     ]);
   }
 
-  const updateNewConversation = (newTitle: string, new_model_name: string) => {
+  const updateNewConversation = (
+    conversation_id: string,
+    newTitle: string,
+    new_model_name: string,
+  ) => {
     const updatedChats = chats.map((chat) => {
       if (chat.conversation_id === "new") {
         return {
@@ -109,16 +129,19 @@ export const SingleChat = () => {
         return chat;
       }
     });
-    console.log(newTitle, new_model_name, chats);
+    setCacheConversationId(conversation_id);
     setChats(updatedChats);
   };
-
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
         <StartNewChatContext.Provider value={startNewChat}>
           <BotModelContext.Provider value={{ botModel, setBotModel }} />
-          <LeftNavBar chats={chats} chosenChatId={conversation_id} />
+          <LeftNavBar
+            chats={chats}
+            chosenChatId={conversation_id}
+            key={chats.map((x) => x.conversation_id).join()}
+          />
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>
       {conversation_id && (
