@@ -9,7 +9,7 @@ import axios from "axios";
 import config from "@/config/config";
 
 interface DataItem {
-  category?: string;
+  category: string;
   lastUpdated?: string;
   arena_table?: ArenaTableEntry[];
   dataSource?: string;
@@ -32,7 +32,7 @@ interface Option {
   otherKey: number;
 }
 
-/*const data: DataItem[] = [
+const mockdata: DataItem[] = [
   {
     dataSource: "bt",
     category: "full",
@@ -174,7 +174,7 @@ interface Option {
       },
     ],
   },
-];*/
+];
 
 const columns = [
   { title: "Rank* (UB)", dataIndex: "rank" },
@@ -249,9 +249,9 @@ export const LeaderBoard: React.FC = () => {
 
     async function fetchData() {
       try {
-        const response = await axios.get(config.apiUrl + "/api/v1/arena_table");
+        // const response = await axios.get(config.apiUrl + "/api/v1/arena_table");
+        const response = { data: mockdata };
         setData(response.data);
-
         const options = response.data.map(
           (i: { category: any }, index: any) => ({
             value: index,
