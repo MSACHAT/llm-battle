@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import apiClient from "@/middlewares/axiosInterceptors";

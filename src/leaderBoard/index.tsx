@@ -5,8 +5,6 @@ import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
-import axios from "axios";
-import config from "@/config/config";
 
 interface DataItem {
   category: string;

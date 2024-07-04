@@ -6,14 +6,14 @@ import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router";
-import { Simulate } from "react-dom/test-utils";
-import input = Simulate.input;
+
 type ChatMessage = {
   content: string;
   content_type: string;
   message_id: string;
   role: "user" | "bot";
 };
+
 interface ApiResponse {
   conversation_id: string;
 }
@@ -104,6 +104,7 @@ export const ChatBox = ({
       }
     };
   }, []);
+
   function fetchData() {
     canAutoScrollRef.current = false;
     let newData = [...moreChatHistory];
