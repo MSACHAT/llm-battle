@@ -44,22 +44,24 @@ export const SingleChat = () => {
     setModelName(modelNameFromUrl);
 
     // 请求聊天列表
+
     apiClient.get<Chat[]>(`/api/conversations`).then(async (res) => {
+      let c;
       const data = res;
       if (data.length === 0) {
         //处理没有聊天记录的情况
         isNewChat.current = true;
-        setChats([
+        c = [
           {
             title: "New Chat",
             conversation_id: "new",
             last_message_time: NaN,
             bot_name: modelNameFromUrl,
           },
-        ]);
+        ];
       } else {
         if (chatId === "new") {
-          setChats([
+          c = [
             {
               title: "New Chat",
               conversation_id: "new",
@@ -67,11 +69,17 @@ export const SingleChat = () => {
               bot_name: modelNameFromUrl,
             },
             ...data,
-          ]);
+          ];
         } else {
-          setChats(data);
+          c = data;
         }
       }
+      if (!modelName) {
+        const m = c.find((x) => x.conversation_id === chatId)?.bot_name;
+        console.log(m);
+        setModelName(m);
+      }
+      setChats(c);
     });
   }, []);
 

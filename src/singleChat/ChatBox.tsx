@@ -68,6 +68,9 @@ export const ChatBox = ({
     conversation_id_origin!,
   );
   const [modelName, setModelName] = useState(model_name);
+  useEffect(() => {
+    setModelName(model_name);
+  }, [model_name]);
   const navigate = useNavigate();
   useEffect(() => {
     if (canAutoScrollRef.current) {
@@ -230,7 +233,7 @@ export const ChatBox = ({
   };
 
   const sendMessage = () => {
-    if (!modelName) {
+    if (!modelName && conversation_id === "new") {
       Toast.error("请选择模型");
       return;
     }
