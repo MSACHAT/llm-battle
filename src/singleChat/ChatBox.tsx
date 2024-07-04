@@ -4,6 +4,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { Avatar, Button, TextArea } from "@douyinfe/semi-ui";
 import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
+import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 type ChatMessage = {
   content: string;
   content_type: string;
@@ -47,9 +48,7 @@ export const ChatBox = ({
   model_name?: string;
 }) => {
   const [userInput, setUserInput] = useState("");
-  const [isNewChat, setIsNewChat] = useState(
-    model_name || conversation_id_origin === "new",
-  );
+
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const canAutoScrollRef = useRef(true);
@@ -62,6 +61,9 @@ export const ChatBox = ({
   const timeoutRef = useRef<number | null>(null);
   const [conversation_id, setConversation_id] = useState<string>(
     conversation_id_origin!,
+  );
+  const [isNewChat, setIsNewChat] = useState(
+    model_name || conversation_id === "new",
   );
 
   useEffect(() => {
@@ -237,9 +239,9 @@ export const ChatBox = ({
       },
     ]);
     setUserInput("");
-    if (isNewChat && currModelName) {
+    if (conversation_id === "new") {
+      //TODO 改新增的逻辑
       setIsNewChat(false);
-      // setBotModel(currModelName);
       apiClient
         .post<ApiResponse>(`/api/conversation/create_conversation`, {
           model_name: currModelName,
@@ -275,11 +277,13 @@ export const ChatBox = ({
   };
   return (
     <div className={"single-chat-content"}>
-      {isNewChat && (
-        <div style={{ alignSelf: "center" }}>
+      <div style={{ alignSelf: "center" }}>
+        {conversation_id === "new" ? (
           <ModelSelector defaultModel={model_name} />
-        </div>
-      )}
+        ) : (
+          <Text type={"tertiary"}>{"当前模型：" + model_name}</Text>
+        )}
+      </div>
       <div className={"chat-history-list"} id="chat-history-list">
         <InfiniteScroll
           dataLength={moreChatHistory.length}

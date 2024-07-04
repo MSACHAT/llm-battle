@@ -13,7 +13,7 @@ interface MessageContextType {
 
 export const HandleClickOnChatBlockContext = React.createContext(
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  (conversation_id: string) => {},
+  (conversation_id: string, model: string) => {},
 );
 export const StartNewChatContext = React.createContext(
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -35,15 +35,12 @@ export const SingleChat = () => {
 
   useEffect(() => {
     // 获取url信息
-    const chatId = searchParams.get("chat_id");
-    const modelNameFromUrl = searchParams.get("model_name") || "";
-    if (chatId) {
-      // url指定会话
-      setConversation_id(chatId);
-    } else {
-      // url指定新model
-      setModelName(modelNameFromUrl);
-    }
+    const chatId = searchParams.get("chat_id") || "";
+    setConversation_id(chatId);
+    const modelNameFromUrl = decodeURIComponent(
+      searchParams.get("model_name") || "",
+    );
+    setModelName(modelNameFromUrl);
 
     // 请求聊天列表
     apiClient.get<Chat[]>(`/api/conversations`).then(async (res) => {
@@ -54,21 +51,21 @@ export const SingleChat = () => {
         setChats([
           {
             title: "New Chat",
-            conversation_id: "",
+            conversation_id: "new",
             last_message_time: NaN,
-            bot_name: "",
+            bot_name: modelNameFromUrl,
           },
         ]);
       } else {
-        if (modelNameFromUrl) {
+        if (chatId === "new") {
           setChats([
-            ...data,
             {
               title: "New Chat",
-              conversation_id: "",
+              conversation_id: "new",
               last_message_time: NaN,
-              bot_name: "",
+              bot_name: modelNameFromUrl,
             },
+            ...data,
           ]);
         } else {
           setChats(data);
@@ -77,8 +74,9 @@ export const SingleChat = () => {
     });
   }, []);
 
-  function handleClickOnChatBlock(conversation_id: string) {
+  function handleClickOnChatBlock(conversation_id: string, model: string) {
     setConversation_id(conversation_id);
+    setModelName(model);
     navigate(`/singleChat?chat_id=${conversation_id}`);
   }
 
@@ -97,7 +95,6 @@ export const SingleChat = () => {
       ...chats,
     ]);
   }
-
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
@@ -106,7 +103,13 @@ export const SingleChat = () => {
           <LeftNavBar chats={chats} chosenChatId={conversation_id} />
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>
-      <ChatBox key={conversation_id} conversation_id={conversation_id} />
+      {conversation_id && (
+        <ChatBox
+          key={conversation_id}
+          conversation_id={conversation_id}
+          model_name={modelName}
+        />
+      )}
     </div>
   );
 };

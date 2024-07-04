@@ -20,10 +20,13 @@ export const LeftNavBar = ({
   chosenChatId: string | undefined | null;
 }) => {
   const [currChats, setCurrChats] = useState<Chat[]>([]);
+  const [currChatId, setCurrChatId] = useState(chosenChatId);
   useEffect(() => {
     setCurrChats(chats);
   }, [chats]);
-  const [currChatId, setCurrChatId] = useState(chosenChatId);
+  useEffect(() => {
+    setCurrChatId(chosenChatId);
+  }, [chosenChatId]);
   const isChosen = (conversationId: string) => {
     return conversationId === currChatId;
   };
@@ -78,8 +81,6 @@ export const LeftNavBar = ({
                     return chat;
                   }),
                 );
-                console.log(inputTitle);
-                console.log(conversation_id);
                 apiClient.patch(`/api/conversation/title`, {
                   conversation_id: conversation_id,
                   title: inputTitle,
@@ -126,7 +127,7 @@ export const LeftNavBar = ({
         className={"chat-block-root"}
         onClick={() => {
           if (!isChosen(conversation_id)) {
-            handleClick(conversation_id);
+            handleClick(conversation_id, model);
             setCurrChatId(conversation_id);
           }
         }}
