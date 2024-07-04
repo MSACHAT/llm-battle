@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ModelSelector } from "@/singleChat/ModelSelector";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Avatar, Button, TextArea } from "@douyinfe/semi-ui";
+import { Avatar, Button, TextArea, Toast } from "@douyinfe/semi-ui";
 import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
+import { useNavigate } from "react-router";
+import { Simulate } from "react-dom/test-utils";
+import input = Simulate.input;
 type ChatMessage = {
   content: string;
   content_type: string;
@@ -43,9 +46,11 @@ const UserQuery = ({ query }: { query: string }) => {
 export const ChatBox = ({
   conversation_id: conversation_id_origin,
   model_name,
+  updateNewConversation,
 }: {
   conversation_id?: string;
   model_name?: string;
+  updateNewConversation: any;
 }) => {
   const [userInput, setUserInput] = useState("");
 
@@ -62,10 +67,8 @@ export const ChatBox = ({
   const [conversation_id, setConversation_id] = useState<string>(
     conversation_id_origin!,
   );
-  const [isNewChat, setIsNewChat] = useState(
-    model_name || conversation_id === "new",
-  );
-
+  const [modelName, setModelName] = useState(model_name);
+  const navigate = useNavigate();
   useEffect(() => {
     if (canAutoScrollRef.current) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -227,7 +230,10 @@ export const ChatBox = ({
   };
 
   const sendMessage = () => {
-    const currModelName = localStorage.getItem("current_model_name");
+    if (!modelName) {
+      Toast.error("请选择模型");
+      return;
+    }
     canAutoScrollRef.current = true;
     setChatHistory((prevHistory) => [
       ...prevHistory,
@@ -238,22 +244,22 @@ export const ChatBox = ({
         content_type: "text",
       },
     ]);
-    setUserInput("");
     if (conversation_id === "new") {
-      //TODO 改新增的逻辑
-      setIsNewChat(false);
       apiClient
         .post<ApiResponse>(`/api/conversation/create_conversation`, {
-          model_name: currModelName,
+          model_name: modelName,
         })
         .then((res) => {
           const data = res;
           setConversation_id(data.conversation_id);
           query(userInput, data.conversation_id);
+          navigate(`/singleChat?chat_id=${data.conversation_id}`);
+          updateNewConversation(userInput.slice(0, 6), modelName); //TODO @何成 优化
         });
     } else {
       query(userInput);
     }
+    setUserInput("");
   };
 
   const handleKeyDown = async (event: {
@@ -279,9 +285,12 @@ export const ChatBox = ({
     <div className={"single-chat-content"}>
       <div style={{ alignSelf: "center" }}>
         {conversation_id === "new" ? (
-          <ModelSelector defaultModel={model_name} />
+          <ModelSelector
+            setModelName={(v: string) => setModelName(v)}
+            defaultModel={modelName}
+          />
         ) : (
-          <Text type={"tertiary"}>{"当前模型：" + model_name}</Text>
+          <Text type={"tertiary"}>{"当前模型：" + modelName}</Text>
         )}
       </div>
       <div className={"chat-history-list"} id="chat-history-list">

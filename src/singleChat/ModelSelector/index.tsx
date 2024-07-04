@@ -13,7 +13,13 @@ type options = {
   model_id: string;
 };
 
-export const ModelSelector = ({ defaultModel = "请选择" }) => {
+export const ModelSelector = ({
+  setModelName,
+  defaultModel = "请选择",
+}: {
+  setModelName: any;
+  defaultModel?: string;
+}) => {
   const [val, setVal] = useState<string>("");
   const currentModels = useRef<model[]>([]);
   const [options, setOptions] = useState<options[]>([]);
@@ -22,7 +28,7 @@ export const ModelSelector = ({ defaultModel = "请选择" }) => {
     value: string | number | any[] | Record<string, any> | undefined,
   ) => {
     if (typeof value === "string") {
-      localStorage.setItem("current_model_name", value);
+      setModelName(value);
       setVal(value);
     }
   };

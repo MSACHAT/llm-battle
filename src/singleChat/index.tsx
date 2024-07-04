@@ -85,6 +85,7 @@ export const SingleChat = () => {
       navigate(`/singleChat?chat_id=new`);
     }
     setConversation_id("new");
+    setModelName("");
     setChats([
       {
         title: "New Chat",
@@ -95,6 +96,23 @@ export const SingleChat = () => {
       ...chats,
     ]);
   }
+
+  const updateNewConversation = (newTitle: string, new_model_name: string) => {
+    const updatedChats = chats.map((chat) => {
+      if (chat.conversation_id === "new") {
+        return {
+          ...chat,
+          title: newTitle,
+          bot_name: new_model_name,
+        };
+      } else {
+        return chat;
+      }
+    });
+    console.log(newTitle, new_model_name, chats);
+    setChats(updatedChats);
+  };
+
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
@@ -108,6 +126,7 @@ export const SingleChat = () => {
           key={conversation_id}
           conversation_id={conversation_id}
           model_name={modelName}
+          updateNewConversation={updateNewConversation}
         />
       )}
     </div>
