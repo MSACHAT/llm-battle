@@ -1,11 +1,7 @@
 import "./LeftNavBar.scss";
 import { Button, Image, Input, Popover, Space } from "@douyinfe/semi-ui";
 import { RefObject, useContext, useEffect, useState } from "react";
-import {
-  BotModelContext,
-  HandleClickOnChatBlockContext,
-  StartNewChatContext,
-} from "../index";
+import { HandleClickOnChatBlockContext, StartNewChatContext } from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
 
@@ -27,23 +23,16 @@ export const LeftNavBar = ({
   useEffect(() => {
     setCurrChats(chats);
   }, [chats]);
-  const { botModel } = useContext(BotModelContext);
   const [currChatId, setCurrChatId] = useState(chosenChatId);
   const isChosen = (conversationId: string) => {
-    if (currChatId === "new") {
-      return conversationId === "";
-    } else if (currChatId) {
-      return conversationId === currChatId;
-    } else {
-      return chats[0].conversation_id === conversationId;
-    }
+    return conversationId === currChatId;
   };
 
   const NewChatButton = () => {
     const startNewChat = useContext(StartNewChatContext);
     const handleClick = () => {
       startNewChat();
-      setCurrChatId("NEWCHAT");
+      setCurrChatId("new");
     };
     return (
       <Button onClick={handleClick} className={"new-chat-button"}>

@@ -13,7 +13,7 @@ type options = {
   model_id: string;
 };
 
-export const ModelSelector = ({ defaultModel = "none" }) => {
+export const ModelSelector = ({ defaultModel = "请选择" }) => {
   const [val, setVal] = useState<string>("");
   const currentModels = useRef<model[]>([]);
   const [options, setOptions] = useState<options[]>([]);

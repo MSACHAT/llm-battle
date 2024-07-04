@@ -13,6 +13,7 @@ type ChatMessage = {
 interface ApiResponse {
   conversation_id: string;
 }
+
 const BotReply = ({ reply }: { reply: string }) => {
   return (
     <div className={"bot-reply"}>
@@ -40,10 +41,15 @@ const UserQuery = ({ query }: { query: string }) => {
 
 export const ChatBox = ({
   conversation_id: conversation_id_origin,
+  model_name,
 }: {
   conversation_id?: string;
+  model_name?: string;
 }) => {
   const [userInput, setUserInput] = useState("");
+  const [isNewChat, setIsNewChat] = useState(
+    model_name || conversation_id_origin === "new",
+  );
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const canAutoScrollRef = useRef(true);
@@ -55,13 +61,9 @@ export const ChatBox = ({
   const bottomRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<number | null>(null);
   const [conversation_id, setConversation_id] = useState<string>(
-    "66865a105a57e33c19e0bdf3",
+    conversation_id_origin!,
   );
-  useEffect(() => {
-    setConversation_id(conversation_id_origin!);
-  }, [conversation_id_origin]);
-  console.log(conversation_id, conversation_id_origin, "222");
-  const isNewChat = false;
+
   useEffect(() => {
     if (canAutoScrollRef.current) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -78,13 +80,14 @@ export const ChatBox = ({
       )
       .then((res: any) => {
         if (res.data) {
+          console.log(res);
           setMoreChatHistory(res.data);
           setPageNum((prevState) => prevState + 1);
         } else {
           setMoreChatHistory([]);
         }
       });
-  }, []);
+  }, [conversation_id]);
 
   useEffect(() => {
     return () => {
@@ -94,9 +97,6 @@ export const ChatBox = ({
     };
   }, []);
   function fetchData() {
-    console.log("FETCHDATA");
-    console.log(totalPages.current);
-    console.log(pageNum);
     canAutoScrollRef.current = false;
     let newData = [...moreChatHistory];
     apiClient
@@ -114,7 +114,7 @@ export const ChatBox = ({
       });
   }
 
-  const query = async (msg: string) => {
+  const query = async (msg: string, conversation_id_new?: string) => {
     try {
       setIsSending(true);
       setButtonContent("终止输出");
@@ -127,7 +127,7 @@ export const ChatBox = ({
         },
         body: JSON.stringify({
           content_type: "text",
-          conversation_id,
+          conversation_id: conversation_id_new || conversation_id,
           query: msg,
         }),
       });
@@ -237,22 +237,21 @@ export const ChatBox = ({
       },
     ]);
     setUserInput("");
-    // if (isNewChat.current && currModelName) {
-    //   isNewChat.current = false;
-    //   // setBotModel(currModelName);
-    //   // console.log(currModelName);
-    //   apiClient
-    //     .post<ApiResponse>(`/api/conversation/create_conversation`, {
-    //       model_name: currModelName,
-    //     })
-    //     .then((res) => {
-    //       const data = res;
-    //       conversation_id = data.conversation_id;
-    //       query(userInput);
-    //     });
-    // } else {
-    //   query(userInput);
-    // }
+    if (isNewChat && currModelName) {
+      setIsNewChat(false);
+      // setBotModel(currModelName);
+      apiClient
+        .post<ApiResponse>(`/api/conversation/create_conversation`, {
+          model_name: currModelName,
+        })
+        .then((res) => {
+          const data = res;
+          setConversation_id(data.conversation_id);
+          query(userInput, data.conversation_id);
+        });
+    } else {
+      query(userInput);
+    }
   };
 
   const handleKeyDown = async (event: {
@@ -276,14 +275,11 @@ export const ChatBox = ({
   };
   return (
     <div className={"single-chat-content"}>
-      <div style={{ alignSelf: "center" }}>
-        {" "}
-        {/*{isNewChat.current || chats.length === 0 ? (*/}
-        {/*  <ModelSelector defaultModel={model_name as unknown as undefined} />*/}
-        {/*) : (*/}
-        {/*  <></>*/}
-        {/*)}*/}
-      </div>
+      {isNewChat && (
+        <div style={{ alignSelf: "center" }}>
+          <ModelSelector defaultModel={model_name} />
+        </div>
+      )}
       <div className={"chat-history-list"} id="chat-history-list">
         <InfiniteScroll
           dataLength={moreChatHistory.length}

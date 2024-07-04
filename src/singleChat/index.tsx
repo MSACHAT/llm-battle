@@ -1,22 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Chat, LeftNavBar } from "./LeftNavBar/LeftNavBar";
 import "./index.scss";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { ChatBox } from "@/singleChat/ChatBox";
-
-type ChatMessage = {
-  content: string;
-  content_type: string;
-  message_id: string;
-  role: "user" | "bot";
-};
-
-interface MessageListResponse {
-  data: ChatMessage[];
-  totalPages: number;
-}
 
 interface MessageContextType {
   botModel: string;
@@ -42,13 +30,13 @@ export const SingleChat = () => {
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [conversation_id, setConversation_id] = useState<null | string>();
-  const [modelName, setModelName] = useState<string | null>();
+  const [conversation_id, setConversation_id] = useState<string>();
+  const [modelName, setModelName] = useState<string>();
 
-  //请求聊天列表
   useEffect(() => {
+    // 获取url信息
     const chatId = searchParams.get("chat_id");
-    const modelNameFromUrl = searchParams.get("model_name");
+    const modelNameFromUrl = searchParams.get("model_name") || "";
     if (chatId) {
       // url指定会话
       setConversation_id(chatId);
@@ -57,7 +45,7 @@ export const SingleChat = () => {
       setModelName(modelNameFromUrl);
     }
 
-    //请求聊天列表
+    // 请求聊天列表
     apiClient.get<Chat[]>(`/api/conversations`).then(async (res) => {
       const data = res;
       if (data.length === 0) {
@@ -89,27 +77,6 @@ export const SingleChat = () => {
     });
   }, []);
 
-  //TODO 处理添加新对话
-  // useEffect(() => {
-  //   if (
-  //     chats &&
-  //     chats[0]?.conversation_id !== "" &&
-  //     conversation_id == "new" &&
-  //     model_name
-  //   ) {
-  //     setChats([
-  //       {
-  //         title: "New Chat",
-  //         conversation_id: "",
-  //         last_message_time: NaN,
-  //         bot_name: "",
-  //       },
-  //       ...chats,
-  //     ]);
-  //     isNewChat.current = true;
-  //   }
-  // }, [chats]);
-
   function handleClickOnChatBlock(conversation_id: string) {
     setConversation_id(conversation_id);
     navigate(`/singleChat?chat_id=${conversation_id}`);
@@ -119,34 +86,27 @@ export const SingleChat = () => {
     if (!modelName) {
       navigate(`/singleChat?chat_id=new`);
     }
-    if (!isNewChat.current) {
-      // localStorage.setItem("current_model_name", "");
-
-      isNewChat.current = true;
-      setChats([
-        {
-          title: "New Chat",
-          conversation_id: "",
-          last_message_time: NaN,
-          bot_name: "",
-        },
-        ...chats,
-      ]);
-    }
+    setConversation_id("new");
+    setChats([
+      {
+        title: "New Chat",
+        conversation_id: "new",
+        last_message_time: NaN,
+        bot_name: "",
+      },
+      ...chats,
+    ]);
   }
-  console.log(conversation_id, 111);
+
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
         <StartNewChatContext.Provider value={startNewChat}>
           <BotModelContext.Provider value={{ botModel, setBotModel }} />
-          <LeftNavBar
-            chats={chats}
-            chosenChatId={isNewChat.current ? "" : conversation_id}
-          />
+          <LeftNavBar chats={chats} chosenChatId={conversation_id} />
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>
-      <ChatBox conversation_id={conversation_id!} />
+      <ChatBox key={conversation_id} conversation_id={conversation_id} />
     </div>
   );
 };
