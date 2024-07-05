@@ -16,7 +16,7 @@ export const ModelText = ({
       heading={6}
       link
       onClick={() => {
-        window.open("/singleChat/1"); //TODO change
+        window.open(`/singleChat/?chat_id=new&model_name=${model.model_name}`);
       }}
     >
       {model.model_name}
@@ -25,7 +25,7 @@ export const ModelText = ({
     <Text
       link
       onClick={() => {
-        navi("/singleChat/1"); //TODO change
+        navi(`/singleChat/?chat_id=new&model_name=${model.model_name}`);
       }}
     >
       {model.model_name}

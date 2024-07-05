@@ -19,6 +19,9 @@ type Story = StoryObj<typeof meta>;
 export const Empty: Story = {
   args: {
     defaultModel: "222",
+    setModelName: () => {
+      console.log("a");
+    },
   },
 };
 

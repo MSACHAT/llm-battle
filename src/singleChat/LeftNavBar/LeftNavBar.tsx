@@ -1,11 +1,7 @@
 import "./LeftNavBar.scss";
 import { Button, Image, Input, Popover, Space } from "@douyinfe/semi-ui";
 import { RefObject, useContext, useEffect, useState } from "react";
-import {
-  BotModelContext,
-  HandleClickOnChatBlockContext,
-  StartNewChatContext,
-} from "../index";
+import { HandleClickOnChatBlockContext, StartNewChatContext } from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
 
@@ -21,29 +17,25 @@ export const LeftNavBar = ({
   chosenChatId,
 }: {
   chats: Chat[];
-  chosenChatId: string | undefined;
+  chosenChatId: string | undefined | null;
 }) => {
   const [currChats, setCurrChats] = useState<Chat[]>([]);
+  const [currChatId, setCurrChatId] = useState(chosenChatId);
   useEffect(() => {
     setCurrChats(chats);
   }, [chats]);
-  const { botModel } = useContext(BotModelContext);
-  const [currChatId, setCurrChatId] = useState(chosenChatId);
+  useEffect(() => {
+    setCurrChatId(chosenChatId);
+  }, [chosenChatId]);
   const isChosen = (conversationId: string) => {
-    if (currChatId === "NEWCHAT") {
-      return conversationId === "";
-    } else if (currChatId) {
-      return conversationId === currChatId;
-    } else {
-      return chats[0].conversation_id === conversationId;
-    }
+    return conversationId === currChatId;
   };
 
   const NewChatButton = () => {
     const startNewChat = useContext(StartNewChatContext);
     const handleClick = () => {
       startNewChat();
-      setCurrChatId("NEWCHAT");
+      setCurrChatId("new");
     };
     return (
       <Button onClick={handleClick} className={"new-chat-button"}>
@@ -89,8 +81,6 @@ export const LeftNavBar = ({
                     return chat;
                   }),
                 );
-                console.log(inputTitle);
-                console.log(conversation_id);
                 apiClient.patch(`/api/conversation/title`, {
                   conversation_id: conversation_id,
                   title: inputTitle,
@@ -137,7 +127,7 @@ export const LeftNavBar = ({
         className={"chat-block-root"}
         onClick={() => {
           if (!isChosen(conversation_id)) {
-            handleClick(conversation_id);
+            handleClick(conversation_id, model);
             setCurrChatId(conversation_id);
           }
         }}
