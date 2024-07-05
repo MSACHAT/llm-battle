@@ -5,6 +5,8 @@ import { IconChevronDown } from "@douyinfe/semi-icons";
 import { TriggerRenderProps } from "@douyinfe/semi-ui/lib/es/select";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { ModelText } from "@/component/utils";
+import axios from "axios";
+import config from "@/config/config";
 
 interface DataItem {
   category: string;
@@ -29,150 +31,6 @@ interface Option {
   label: string;
   otherKey: number;
 }
-
-const mockdata: DataItem[] = [
-  {
-    dataSource: "bt",
-    category: "full",
-    lastUpdated: "2024-05-27 21:55:57 PDT",
-    arena_table: [
-      {
-        rank: "1",
-        model: "GPT-4o",
-        elo: 1013,
-        ci: "+30/-30",
-        votes: 209,
-        organization: "OpenAI",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-10",
-      },
-      {
-        rank: "2",
-        model: "Gemini-1.5 pro",
-        elo: 1009,
-        ci: "+42/-39",
-        votes: 172,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-      {
-        rank: "3",
-        model: "GPT-4",
-        elo: 1009,
-        ci: "+41/-37",
-        votes: 189,
-        organization: "OpenAI",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-04",
-      },
-      {
-        rank: "4",
-        model: "Gemini-1.5 flash",
-        elo: 1007,
-        ci: "+35/-27",
-        votes: 216,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-    ],
-  },
-  {
-    dataSource: "bt",
-    category: "chinese",
-    lastUpdated: "2024-05-27 09:25:49 PDT",
-    arena_table: [
-      {
-        rank: "1",
-        model: "Gemini-1.5 flash",
-        elo: 1053,
-        ci: "+74/-53",
-        votes: 45,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-      {
-        rank: "2",
-        model: "Gemini-1.5 pro",
-        elo: 1044,
-        ci: "+95/-83",
-        votes: 41,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-      {
-        rank: "3",
-        model: "GPT-4o",
-        elo: 1014,
-        ci: "+70/-74",
-        votes: 40,
-        organization: "OpenAI",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-10",
-      },
-      {
-        rank: "4",
-        model: "GPT-4",
-        elo: 1008,
-        ci: "+75/-71",
-        votes: 48,
-        organization: "Proprietary",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-04",
-      },
-    ],
-  },
-  {
-    dataSource: "bt",
-    category: "english",
-    lastUpdated: "2024-05-27 21:55:57 PDT",
-    arena_table: [
-      {
-        rank: "1",
-        model: "Gemini-1.5 flash",
-        elo: 1053,
-        ci: "+42/-36",
-        votes: 45,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-      {
-        rank: "2",
-        model: "Gemini-1.5 pro",
-        elo: 1019,
-        ci: "+48/-38",
-        votes: 41,
-        organization: "Google",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-11",
-      },
-      {
-        rank: "3",
-        model: "GPT-4o",
-        elo: 1012,
-        ci: "+40/-39",
-        votes: 40,
-        organization: "OpenAI",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-10",
-      },
-      {
-        rank: "4",
-        model: "GPT-4",
-        elo: 1011,
-        ci: "+44/-24",
-        votes: 48,
-        organization: "Proprietary",
-        license: "Proprietary",
-        knowledgeCutoff: "2023-04",
-      },
-    ],
-  },
-];
 
 const columns = [
   { title: "Rank* (UB)", dataIndex: "rank" },
@@ -247,8 +105,7 @@ export const LeaderBoard: React.FC = () => {
 
     async function fetchData() {
       try {
-        // const response = await axios.get(config.apiUrl + "/api/v1/arena_table");
-        const response = { data: mockdata };
+        const response = await axios.get(config.apiUrl + "/api/v1/arena_table");
         setData(response.data);
         const options = response.data.map(
           (i: { category: any }, index: any) => ({
