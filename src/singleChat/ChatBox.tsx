@@ -354,6 +354,9 @@ export const ChatBox = ({
               sendMessage();
             } else {
               setIsSending(false);
+              apiClient.post<null>("api/conversation/break_message", {
+                conversation_id: conversation_id,
+              });
             }
           }}
           disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending
