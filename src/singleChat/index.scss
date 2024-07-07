@@ -3,6 +3,7 @@
   justify-content: left;
   align-items: start;
   gap: 0.5em;
+  margin-bottom: 22px;
 
   .bot-chat-bubble {
     max-width: 680px;
@@ -28,6 +29,7 @@
 }
 
 .user-query {
+  margin-bottom:22px;
   display: flex;
   justify-content: right;
   align-items: start;
