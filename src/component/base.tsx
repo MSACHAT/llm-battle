@@ -1,11 +1,12 @@
 import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
 import { useEffect, useState } from "react";
 import "./index.scss";
 import apiClient from "@/middlewares/axiosInterceptors";
 import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
+import { navigate } from "@storybook/addon-links";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
 
@@ -15,16 +16,23 @@ interface NavBarProps {
 
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const [lastConversationId, setLastConversationId] = useState("");
+  const navigate = useNavigate();
   useEffect(() => {
-    apiClient.get(`/api/conversations`).then((res) => {
-      const data = res as unknown as Chat[];
-      if (data.length > 0) {
-        setLastConversationId(data[0].conversation_id);
-      } else {
-        setLastConversationId("none");
-      }
-    });
+    if (localStorage.getItem("token")) {
+      apiClient.get(`/api/conversations`).then((res) => {
+        const data = res as unknown as Chat[];
+        if (data.length > 0) {
+          setLastConversationId(data[0].conversation_id);
+        } else {
+          setLastConversationId("none");
+        }
+      });
+    }
   }, [lastConversationId]);
+  const logout = () => {
+    navigate("/login");
+    localStorage.removeItem("token");
+  };
   if (beShown === false) {
     return (
       <div>
@@ -88,7 +96,7 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
               position="bottomRight"
               render={
                 <Dropdown.Menu>
-                  <Dropdown.Item>退出</Dropdown.Item>
+                  <Dropdown.Item onClick={logout}>退出</Dropdown.Item>
                 </Dropdown.Menu>
               }
             >
