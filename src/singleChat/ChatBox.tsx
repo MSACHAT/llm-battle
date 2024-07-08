@@ -98,7 +98,7 @@ export const ChatBox = ({
         }
       })
       .catch((err) => {
-        console.log(err);
+        Toast.error(err.message);
       });
   }, [conversation_id]);
 
@@ -127,7 +127,7 @@ export const ChatBox = ({
         }
       })
       .catch((err) => {
-        console.log(err);
+        Toast.error(err.message);
       });
   }
 
@@ -272,7 +272,7 @@ export const ChatBox = ({
           ); //TODO @何成 优化
         })
         .catch((err) => {
-          console.log(err);
+          Toast.error(err.message);
         });
     } else {
       query(userInput);
@@ -368,7 +368,7 @@ export const ChatBox = ({
                 .post<null>("api/conversation/break_message", {
                   conversation_id: conversation_id,
                 })
-                .catch((err) => console.log(err));
+                .catch((err) => Toast.error(err.message));
             }
           }}
           disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending

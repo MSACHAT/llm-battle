@@ -5,6 +5,7 @@ import apiClient from "@/middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { ChatBox } from "@/singleChat/ChatBox";
+import { Toast } from "@douyinfe/semi-ui";
 
 interface MessageContextType {
   botModel: string;
@@ -83,7 +84,7 @@ export const SingleChat = () => {
         }
         setChats(c);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => Toast.error(err.message));
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string, model: string) {

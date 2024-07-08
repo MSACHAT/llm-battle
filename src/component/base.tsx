@@ -1,4 +1,11 @@
-import { Avatar, Dropdown, Nav, Space, Tooltip } from "@douyinfe/semi-ui";
+import {
+  Avatar,
+  Dropdown,
+  Nav,
+  Space,
+  Toast,
+  Tooltip,
+} from "@douyinfe/semi-ui";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import AIIcon from "./navigation-header-logo.svg";
 import RuleIcon from "./icon-rules.svg";
@@ -9,7 +16,6 @@ import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
 import { navigate } from "@storybook/addon-links";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
-
 interface NavBarProps {
   beShown: boolean;
 }
@@ -29,7 +35,9 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
             setLastConversationId("none");
           }
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          Toast.error(err.message);
+        });
     }
   }, [lastConversationId]);
   const logout = () => {
