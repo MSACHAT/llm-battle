@@ -1,5 +1,5 @@
 import "./LeftNavBar.scss";
-import { Button, Image, Input, Popover, Space } from "@douyinfe/semi-ui";
+import { Button, Image, Input, Popover, Space, Toast } from "@douyinfe/semi-ui";
 import { RefObject, useContext, useEffect, useState } from "react";
 import { HandleClickOnChatBlockContext, StartNewChatContext } from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
@@ -81,10 +81,15 @@ export const LeftNavBar = ({
                     return chat;
                   }),
                 );
-                apiClient.patch(`/api/conversation/title`, {
-                  conversation_id: conversation_id,
-                  title: inputTitle,
-                });
+                apiClient
+                  .patch(`/api/conversation/title`, {
+                    conversation_id: conversation_id,
+                    title: inputTitle,
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    Toast.error("修改失败，请稍后再试");
+                  });
               }}
             />
           </Space>
