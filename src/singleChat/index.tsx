@@ -112,17 +112,19 @@ export const SingleChat = () => {
     if (!modelName) {
       navigate(`/singleChat?chat_id=new`);
     }
-    setConversation_id("new");
-    setModelName("");
-    setChats([
-      {
-        title: "New Chat",
-        conversation_id: "new",
-        last_message_time: NaN,
-        bot_name: "",
-      },
-      ...chats,
-    ]);
+    if (chats[0]?.conversation_id !== "new") {
+      setConversation_id("new");
+      setModelName("");
+      setChats([
+        {
+          title: "New Chat",
+          conversation_id: "new",
+          last_message_time: NaN,
+          bot_name: "",
+        },
+        ...chats,
+      ]);
+    }
   }
 
   const updateNewConversation = (
