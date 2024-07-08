@@ -6,6 +6,8 @@ import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router";
+import { Simulate } from "react-dom/test-utils";
+import error = Simulate.error;
 
 type ChatMessage = {
   content: string;
@@ -94,6 +96,9 @@ export const ChatBox = ({
         } else {
           setMoreChatHistory([]);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }, [conversation_id]);
 
@@ -120,6 +125,9 @@ export const ChatBox = ({
         } else {
           setPageNum((prevState) => prevState + 1);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }
 
@@ -220,7 +228,6 @@ export const ChatBox = ({
 
       return new Response(stream);
     } catch (e: any) {
-      console.log("Error", e);
       clearTimeout(timeoutRef.current!);
       setIsSending(false);
       setButtonContent("发送");
@@ -263,6 +270,9 @@ export const ChatBox = ({
             userInput.slice(0, 6),
             modelName,
           ); //TODO @何成 优化
+        })
+        .catch((err) => {
+          console.log(err);
         });
     } else {
       query(userInput);
@@ -354,9 +364,11 @@ export const ChatBox = ({
               sendMessage();
             } else {
               setIsSending(false);
-              apiClient.post<null>("api/conversation/break_message", {
-                conversation_id: conversation_id,
-              });
+              apiClient
+                .post<null>("api/conversation/break_message", {
+                  conversation_id: conversation_id,
+                })
+                .catch((err) => console.log(err));
             }
           }}
           disabled={!userInput.trim() && !isSending} // Disable the button when input is empty or sending

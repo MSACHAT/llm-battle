@@ -19,14 +19,17 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      apiClient.get(`/api/conversations`).then((res) => {
-        const data = res as unknown as Chat[];
-        if (data.length > 0) {
-          setLastConversationId(data[0].conversation_id);
-        } else {
-          setLastConversationId("none");
-        }
-      });
+      apiClient
+        .get(`/api/conversations`)
+        .then((res) => {
+          const data = res as unknown as Chat[];
+          if (data.length > 0) {
+            setLastConversationId(data[0].conversation_id);
+          } else {
+            setLastConversationId("none");
+          }
+        })
+        .catch((err) => console.log(err));
     }
   }, [lastConversationId]);
   const logout = () => {

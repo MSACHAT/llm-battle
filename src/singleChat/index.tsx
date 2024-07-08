@@ -45,22 +45,14 @@ export const SingleChat = () => {
 
     // 请求聊天列表
 
-    apiClient.get<Chat[]>(`/api/conversations`).then(async (res) => {
-      let c;
-      const data = res;
-      if (data.length === 0) {
-        //处理没有聊天记录的情况
-        isNewChat.current = true;
-        c = [
-          {
-            title: "New Chat",
-            conversation_id: "new",
-            last_message_time: NaN,
-            bot_name: modelNameFromUrl,
-          },
-        ];
-      } else {
-        if (chatId === "new") {
+    apiClient
+      .get<Chat[]>(`/api/conversations`)
+      .then(async (res) => {
+        let c;
+        const data = res;
+        if (data.length === 0) {
+          //处理没有聊天记录的情况
+          isNewChat.current = true;
           c = [
             {
               title: "New Chat",
@@ -68,19 +60,30 @@ export const SingleChat = () => {
               last_message_time: NaN,
               bot_name: modelNameFromUrl,
             },
-            ...data,
           ];
         } else {
-          c = data;
+          if (chatId === "new") {
+            c = [
+              {
+                title: "New Chat",
+                conversation_id: "new",
+                last_message_time: NaN,
+                bot_name: modelNameFromUrl,
+              },
+              ...data,
+            ];
+          } else {
+            c = data;
+          }
         }
-      }
-      if (!modelName) {
-        const m = c.find((x) => x.conversation_id === chatId)?.bot_name;
-        console.log(m);
-        setModelName(m);
-      }
-      setChats(c);
-    });
+        if (!modelName) {
+          const m = c.find((x) => x.conversation_id === chatId)?.bot_name;
+          console.log(m);
+          setModelName(m);
+        }
+        setChats(c);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
   function handleClickOnChatBlock(conversation_id: string, model: string) {
