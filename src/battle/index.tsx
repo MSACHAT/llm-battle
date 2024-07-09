@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { Message, ModelModel } from "@/interface";
 import VoteComponent from "@/battle/components/voteComponent";
 import config from "@/config/config";
-import { ModelText } from "@/component/utils";
+import { ModelText, StopAnswerButton } from "@/component/utils";
 import apiClient from "@/middlewares/axiosInterceptors";
 
 interface StreamMessages {
@@ -242,8 +242,9 @@ export const Battle = () => {
       if (!text) {
         return;
       }
-      stopGenerate();
-      await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+      if (answering) {
+        return;
+      }
       sendTextChatMessages(text);
     }
   };
@@ -278,6 +279,7 @@ export const Battle = () => {
       ) : (
         <Battles />
       )}
+      {answering && <StopAnswerButton onClick={stopGenerate} />}
       {messages[models[0]].filter((x) => x.type === "reply").length > 0 && (
         <VoteComponent
           battle_id={battle_id}
@@ -299,12 +301,14 @@ export const Battle = () => {
           onEnterPress={handleKeyDown}
         />
         <Button
-          disabled={!text.length && !answering}
+          disabled={!text.length || answering}
           theme="solid"
           className={"battle-send-button"}
-          onClick={stopGenerate}
+          onClick={() => {
+            sendTextChatMessages(text);
+          }}
         >
-          {answering ? "终止输出" : "发送"}
+          发送
         </Button>
       </div>
       {(messages[models[0]].filter((x) => x.type === "reply").length > 0 ||
