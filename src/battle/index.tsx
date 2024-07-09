@@ -210,6 +210,12 @@ export const Battle = () => {
         models.reduce((acc, model) => ({ ...acc, [model]: "" }), {}),
       );
     } catch (e: any) {
+      if (
+        e.message === "signal is aborted without reason" ||
+        e.message === "BodyStreamBuffer was aborted"
+      ) {
+        return;
+      }
       const error = `Error: ${e.message || e.stack || e}`;
       const errorMessage = {
         id: messages[models[0]].length,
