@@ -117,15 +117,15 @@ export const SingleChat = () => {
   }
 
   async function startNewChat() {
-    if (chats[0]?.conversation_id == "new") {
+    //在新建聊天时将之前新建的conversation_id从new更新为正确id
+    const chats_t = changeNewChatId();
+    if (chats_t[0]?.conversation_id == "new") {
       Toast.info("当前已是新聊天");
       return;
     }
     if (!modelName) {
       navigate(`/singleChat?chat_id=new`);
     }
-    //在新建聊天时将之前新建的conversation_id从new更新为正确id
-    const chats_t = changeNewChatId();
     await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
     if (chats_t[0]?.conversation_id !== "new") {
       setConversation_id("new");
