@@ -87,8 +87,8 @@ export const SingleChat = () => {
       .catch((err) => Toast.error(err.message));
   }, []);
 
-  function handleClickOnChatBlock(conversation_id: string, model: string) {
-    //在切换其它对话的时候把新建的conversation_id从new更新为正确id
+  //把新建的conversation_id从new更新为正确id
+  const changeNewChatId = () => {
     if (cacheConversationId) {
       const updatedChats = chats.map((chat) => {
         if (chat.conversation_id === "new") {
@@ -101,18 +101,33 @@ export const SingleChat = () => {
         }
       });
       setCacheConversationId("");
+      setConversation_id("");
       setChats(updatedChats);
+      return updatedChats;
     }
+    return chats;
+  };
+
+  function handleClickOnChatBlock(conversation_id: string, model: string) {
+    //在切换其它对话的时候把新建的conversation_id从new更新为正确id
+    changeNewChatId();
     setConversation_id(conversation_id);
     setModelName(model);
     navigate(`/singleChat?chat_id=${conversation_id}`);
   }
 
-  function startNewChat() {
+  async function startNewChat() {
+    if (chats[0]?.conversation_id == "new") {
+      Toast.info("当前已是新聊天");
+      return;
+    }
     if (!modelName) {
       navigate(`/singleChat?chat_id=new`);
     }
-    if (chats[0]?.conversation_id !== "new") {
+    //在新建聊天时将之前新建的conversation_id从new更新为正确id
+    const chats_t = changeNewChatId();
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
+    if (chats_t[0]?.conversation_id !== "new") {
       setConversation_id("new");
       setModelName("");
       setChats([
@@ -122,7 +137,7 @@ export const SingleChat = () => {
           last_message_time: NaN,
           bot_name: "",
         },
-        ...chats,
+        ...chats_t,
       ]);
     }
   }
