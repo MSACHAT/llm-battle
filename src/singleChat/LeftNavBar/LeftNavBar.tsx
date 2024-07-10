@@ -9,6 +9,7 @@ import {
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 export type Chat = {
   conversation_id: string;
@@ -28,6 +29,7 @@ export const LeftNavBar = ({
   const [currChatId, setCurrChatId] = useState(chosenChatId);
   const navigate = useNavigate();
   const deleteChat = useContext(DeleteChatContext);
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     setCurrChats(chats);
   }, [chats]);
@@ -119,7 +121,9 @@ export const LeftNavBar = ({
                     return chat.conversation_id !== conversation_id;
                   }),
                 );
-                apiClient.delete(`/api/conversation/${conversation_id}`);
+                apiClient.delete(
+                  `/api/conversation/${searchParams.get("chat_id")}`,
+                );
                 deleteChat();
               }}
             >
