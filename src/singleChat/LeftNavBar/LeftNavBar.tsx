@@ -1,9 +1,14 @@
 import "./LeftNavBar.scss";
 import { Button, Image, Input, Popover, Space, Toast } from "@douyinfe/semi-ui";
 import { RefObject, useContext, useEffect, useState } from "react";
-import { HandleClickOnChatBlockContext, StartNewChatContext } from "../index";
+import {
+  DeleteChatContext,
+  HandleClickOnChatBlockContext,
+  StartNewChatContext,
+} from "../index";
 import { IconDelete, IconEdit } from "@douyinfe/semi-icons";
 import apiClient from "../../middlewares/axiosInterceptors";
+import { useNavigate } from "react-router";
 
 export type Chat = {
   conversation_id: string;
@@ -21,6 +26,8 @@ export const LeftNavBar = ({
 }) => {
   const [currChats, setCurrChats] = useState<Chat[]>([]);
   const [currChatId, setCurrChatId] = useState(chosenChatId);
+  const navigate = useNavigate();
+  const deleteChat = useContext(DeleteChatContext);
   useEffect(() => {
     setCurrChats(chats);
   }, [chats]);
@@ -113,6 +120,7 @@ export const LeftNavBar = ({
                   }),
                 );
                 apiClient.delete(`/api/conversation/${conversation_id}`);
+                deleteChat();
               }}
             >
               确定删除

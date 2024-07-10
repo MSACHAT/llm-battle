@@ -32,7 +32,7 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
           if (data.length > 0) {
             setLastConversationId(data[0].conversation_id);
           } else {
-            setLastConversationId("none");
+            setLastConversationId("new");
           }
         })
         .catch((err) => {
@@ -71,7 +71,6 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
             battle: "/battle",
             leaderBoard: "/leaderBoard",
             chat: `/singleChat?chat_id=${lastConversationId}`,
-            // chat: `/singleChat/all`, //TODO 修改
           };
           const itemKey = props.itemKey as NavItemKey;
           return (

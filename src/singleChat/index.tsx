@@ -25,6 +25,8 @@ export const BotModelContext = React.createContext<MessageContextType>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setBotModel: () => {},
 });
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const DeleteChatContext = React.createContext(() => {});
 export const SingleChat = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const isNewChat = useRef(false);
@@ -34,7 +36,6 @@ export const SingleChat = () => {
   const [conversation_id, setConversation_id] = useState<string>();
   const [modelName, setModelName] = useState<string>();
   const [cacheConversationId, setCacheConversationId] = useState("");
-
   useEffect(() => {
     // 获取url信息
     const chatId = searchParams.get("chat_id") || "";
@@ -161,16 +162,27 @@ export const SingleChat = () => {
     setCacheConversationId(conversation_id);
     setChats(updatedChats);
   };
+
+  const deleteChat = () => {
+    setChats(
+      chats.filter((chat) => {
+        return chat.conversation_id !== conversation_id;
+      }),
+    );
+    setConversation_id("");
+  };
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
         <StartNewChatContext.Provider value={startNewChat}>
           <BotModelContext.Provider value={{ botModel, setBotModel }} />
-          <LeftNavBar
-            chats={chats}
-            chosenChatId={conversation_id}
-            key={chats.map((x) => x.conversation_id).join()}
-          />
+          <DeleteChatContext.Provider value={deleteChat}>
+            <LeftNavBar
+              chats={chats}
+              chosenChatId={conversation_id}
+              key={chats.map((x) => x.conversation_id).join()}
+            />
+          </DeleteChatContext.Provider>
         </StartNewChatContext.Provider>
       </HandleClickOnChatBlockContext.Provider>
       {conversation_id && (
