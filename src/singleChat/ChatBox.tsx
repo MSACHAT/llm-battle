@@ -7,7 +7,6 @@ import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router";
 import { Simulate } from "react-dom/test-utils";
-import error = Simulate.error;
 
 type ChatMessage = {
   content: string;
@@ -49,13 +48,14 @@ export const ChatBox = ({
   conversation_id: conversation_id_origin,
   model_name,
   updateNewConversation,
+  isNewChat,
 }: {
   conversation_id?: string;
   model_name?: string;
   updateNewConversation: any;
+  isNewChat: boolean;
 }) => {
   const [userInput, setUserInput] = useState("");
-
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const canAutoScrollRef = useRef(true);
@@ -84,22 +84,24 @@ export const ChatBox = ({
     isSendingRef.current = isSending;
   }, [isSending]);
   useEffect(() => {
-    apiClient
-      .get(
-        `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=0`,
-      )
-      .then((res: any) => {
-        if (res.data) {
-          console.log(res);
-          setMoreChatHistory(res.data);
-          setPageNum((prevState) => prevState + 1);
-        } else {
-          setMoreChatHistory([]);
-        }
-      })
-      .catch((err) => {
-        Toast.error(err.message);
-      });
+    if (!isNewChat) {
+      apiClient
+        .get(
+          `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=0`,
+        )
+        .then((res: any) => {
+          if (res.data) {
+            console.log(res);
+            setMoreChatHistory(res.data);
+            setPageNum((prevState) => prevState + 1);
+          } else {
+            setMoreChatHistory([]);
+          }
+        })
+        .catch((err) => {
+          Toast.error(err.message);
+        });
+    }
   }, [conversation_id]);
 
   useEffect(() => {
