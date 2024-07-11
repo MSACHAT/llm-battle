@@ -6,15 +6,17 @@
   margin-bottom: 22px;
 
   .bot-chat-bubble {
-    max-width: 680px;
+    max-width: 100%; /* 确保对话框不会超出视窗宽度 */
     background-color: rgb(90, 92, 112);
     color: rgb(200, 189, 149);
     font-family: "PingFang SC", serif;
     font-size: 16px;
-    line-height: 24px;
     word-wrap: break-word;
+    overflow-wrap: break-word; /* 确保长单词正确换行 */
     border-radius: 0 20px 20px 20px;
-    padding: 12px 20px 12px 20px;
+    padding: 0px 20px 0px 20px;
+    word-break: break-all;
+    hyphens: auto; /* 添加断字符号 */
   }
 
   .bot-avatar {
@@ -27,6 +29,7 @@
     }
   }
 }
+
 
 .user-query {
   margin-bottom:22px;

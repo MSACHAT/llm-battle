@@ -7,6 +7,9 @@ import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router";
 import { Simulate } from "react-dom/test-utils";
+import { marked } from "marked";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
 
 type ChatMessage = {
   content: string;
@@ -19,6 +22,30 @@ interface ApiResponse {
   conversation_id: string;
 }
 
+function renderMessageContent(msg: any) {
+  marked.setOptions({
+    renderer: new marked.Renderer(),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    highlight: function (code, _lang) {
+      return hljs.highlightAuto(code).value;
+    },
+    langPrefix: "hljs language-",
+    pedantic: false,
+    gfm: true,
+    breaks: false,
+    sanitize: false,
+    smartypants: false,
+    xhtml: false,
+  });
+  const html = marked(msg);
+  return (
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    <div className="show-html" dangerouslySetInnerHTML={{ __html: html }}></div>
+  );
+}
+
 const BotReply = ({ reply }: { reply: string }) => {
   return (
     <div className={"bot-reply"}>
@@ -28,7 +55,7 @@ const BotReply = ({ reply }: { reply: string }) => {
         src={"/bot_avatar.png"}
         className={"bot-avatar"}
       />
-      <div className={"bot-chat-bubble"}>{reply}</div>
+      <div className={"bot-chat-bubble"}>{renderMessageContent(reply)}</div>
     </div>
   );
 };
