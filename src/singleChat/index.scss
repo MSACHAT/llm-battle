@@ -4,7 +4,7 @@
   align-items: start;
   gap: 0.5em;
   margin-bottom: 22px;
-
+  max-width: 70vw;
   .bot-chat-bubble {
     max-width: 100%; /* 确保对话框不会超出视窗宽度 */
     background-color: rgb(90, 92, 112);
@@ -29,7 +29,12 @@
     }
   }
   .show-html pre code {
+    white-space: break-spaces;
     background: rgb(80, 82, 100);
+    word-break: break-all;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    hyphens:auto;
   }
 }
 
