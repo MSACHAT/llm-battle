@@ -30,7 +30,6 @@ export const DeleteChatContext = React.createContext(() => {});
 export const SingleChat = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const isNewChatRef = useRef(false);
-  const [isNewChat, setIsNewChat] = useState(false);
   const [botModel, setBotModel] = useState<string>("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -113,7 +112,6 @@ export const SingleChat = () => {
   function handleClickOnChatBlock(conversation_id: string, model: string) {
     //在切换其它对话的时候把新建的conversation_id从new更新为正确id
     changeNewChatId();
-    setIsNewChat(false);
     setConversation_id(conversation_id);
     setModelName(model);
     navigate(`/singleChat?chat_id=${conversation_id}`);
@@ -131,7 +129,6 @@ export const SingleChat = () => {
     }
     await new Promise((resolve) => setTimeout(resolve, 100)); // 等待下一个事件循环
     if (chats_t[0]?.conversation_id !== "new") {
-      setIsNewChat(true);
       setConversation_id("new");
       setModelName("");
       setChats([
@@ -174,6 +171,7 @@ export const SingleChat = () => {
     );
     setConversation_id("");
   };
+  console.log(conversation_id);
   return (
     <div className={"single-chat"}>
       <HandleClickOnChatBlockContext.Provider value={handleClickOnChatBlock}>
@@ -194,7 +192,6 @@ export const SingleChat = () => {
           conversation_id={conversation_id}
           model_name={modelName}
           updateNewConversation={updateNewConversation}
-          isNewChat={isNewChat}
         />
       )}
     </div>
