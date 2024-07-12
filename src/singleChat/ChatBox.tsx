@@ -75,12 +75,10 @@ export const ChatBox = ({
   conversation_id: conversation_id_origin,
   model_name,
   updateNewConversation,
-  isNewChat,
 }: {
   conversation_id?: string;
   model_name?: string;
   updateNewConversation: any;
-  isNewChat: boolean;
 }) => {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -111,7 +109,7 @@ export const ChatBox = ({
     isSendingRef.current = isSending;
   }, [isSending]);
   useEffect(() => {
-    if (!isNewChat) {
+    if (conversation_id_origin !== "new") {
       apiClient
         .get(
           `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=0`,
@@ -298,7 +296,7 @@ export const ChatBox = ({
             data.conversation_id,
             userInput.slice(0, 6),
             modelName,
-          ); //TODO @何成 优化
+          );
         })
         .catch((err) => {
           Toast.error(err.message);
