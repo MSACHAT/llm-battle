@@ -6,9 +6,8 @@ import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
 import { useNavigate } from "react-router";
-import { Simulate } from "react-dom/test-utils";
-import { marked } from "marked";
-import hljs from "highlight.js";
+import { BotReply } from "@/battle/components/BotReplyBubble";
+import { UserQuery } from "@/battle/components/UserQueryBubble";
 import "highlight.js/styles/atom-one-dark.css";
 
 type ChatMessage = {
@@ -21,55 +20,6 @@ type ChatMessage = {
 interface ApiResponse {
   conversation_id: string;
 }
-
-function renderMessageContent(msg: any) {
-  marked.setOptions({
-    renderer: new marked.Renderer(),
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    highlight: function (code, _lang) {
-      return hljs.highlightAuto(code).value;
-    },
-    langPrefix: "hljs language-",
-    pedantic: false,
-    gfm: true,
-    breaks: false,
-    sanitize: false,
-    smartypants: false,
-    xhtml: false,
-  });
-  const html = marked(msg);
-  return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    <div className="show-html" dangerouslySetInnerHTML={{ __html: html }}></div>
-  );
-}
-
-const BotReply = ({ reply }: { reply: string }) => {
-  return (
-    <div className={"bot-reply"}>
-      <Avatar
-        size="medium"
-        alt="Bot"
-        src={"/bot_avatar.png"}
-        className={"bot-avatar"}
-      />
-      <div className={"bot-chat-bubble"}>{renderMessageContent(reply)}</div>
-    </div>
-  );
-};
-
-const UserQuery = ({ query }: { query: string }) => {
-  return (
-    <div className={"user-query"}>
-      <div className={"user-chat-bubble"}>{query}</div>
-      <Avatar size="medium" alt="User" className={"user-avatar"}>
-        YD
-      </Avatar>
-    </div>
-  );
-};
 
 export const ChatBox = ({
   conversation_id: conversation_id_origin,
@@ -359,17 +309,17 @@ export const ChatBox = ({
             <div className={"more-chat-history"}>
               {[...moreChatHistory].map((record) => {
                 if (record.role === "user") {
-                  return <UserQuery query={record.content} />;
+                  return <UserQuery content={record.content} />;
                 } else {
-                  return <BotReply reply={record.content} />;
+                  return <BotReply content={record.content} />;
                 }
               })}
             </div>
             {chatHistory.map((record) => {
               if (record.role === "user") {
-                return <UserQuery query={record.content} />;
+                return <UserQuery content={record.content} />;
               } else {
-                return <BotReply reply={record.content} />;
+                return <BotReply content={record.content} />;
               }
             })}
           </div>

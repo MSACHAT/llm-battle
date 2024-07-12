@@ -1,0 +1,25 @@
+.user-query {
+  margin-bottom:22px;
+  display: flex;
+  justify-content: right;
+  align-items: start;
+  gap: 0.5em;
+
+  .user-chat-bubble {
+    max-width: 680px;
+    background-color: rgb(212, 218, 241);
+    color: black;
+    font-family: "PingFang SC", serif;
+    font-size: 16px;
+    line-height: 24px;
+    word-wrap: break-word;
+    border-radius: 20px 0 20px 20px;
+    padding: 12px 20px 12px 20px;
+  }
+
+  .user-avatar {
+    color: rgb(245, 201, 80);
+    background-color: rgb(90, 92, 112);
+    flex-shrink: 0;
+  }
+}

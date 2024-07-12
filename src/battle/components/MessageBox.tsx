@@ -1,42 +1,8 @@
 import { FC, useEffect, useRef } from "react";
 import { Message } from "@/interface";
 import "../../singleChat/index.scss";
-import { Spin } from "@douyinfe/semi-ui";
-
-const BlinkingCursor: React.FC = () => {
-  return <div className="cursor"></div>;
-};
-
-const BotReply = ({
-  content,
-  loading = false,
-}: {
-  content: string;
-  loading?: boolean;
-}) => {
-  return (
-    <div className={"bot-reply"}>
-      <div className={"bot-chat-bubble"}>
-        {loading && !content ? (
-          <Spin size={"middle"} style={{ marginBottom: -8 }} />
-        ) : (
-          <>
-            {content || "未知错误"}
-            {loading ? <BlinkingCursor /> : ""}
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const UserQuery = ({ content }: { content: string }) => {
-  return (
-    <div className={"user-query"}>
-      <div className={"user-chat-bubble"}>{content}</div>
-    </div>
-  );
-};
+import { BotReply } from "@/battle/components/BotReplyBubble";
+import { UserQuery } from "@/battle/components/UserQueryBubble";
 
 const MessageBox: FC<{
   streamMessage: string;
