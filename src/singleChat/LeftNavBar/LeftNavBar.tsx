@@ -90,11 +90,13 @@ export const LeftNavBar = ({
                     return chat;
                   }),
                 );
+                const reqBody = {
+                  conversation_id: conversation_id,
+                  title: inputTitle,
+                };
+                console.log(reqBody);
                 apiClient
-                  .patch(`/api/conversation/title`, {
-                    conversation_id: conversation_id,
-                    title: inputTitle,
-                  })
+                  .patch(`/api/conversation/title`, reqBody)
                   .catch((err) => {
                     console.log(err);
                     Toast.error("修改失败，请稍后再试");

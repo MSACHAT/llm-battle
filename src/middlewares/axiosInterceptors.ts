@@ -149,7 +149,7 @@ class APIClient {
 
   public patch<T>(url: string, data?: any): Promise<T> {
     return this.client
-      .patch<T>(url)
+      .patch<T>(url, data)
       .then(this.handleSuccess)
       .catch(this.handleError);
   }
