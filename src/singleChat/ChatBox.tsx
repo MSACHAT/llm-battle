@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ModelSelector } from "@/singleChat/ModelSelector";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Avatar, Button, TextArea, Toast } from "@douyinfe/semi-ui";
+import { Button, TextArea, Toast } from "@douyinfe/semi-ui";
 import apiClient from "@/middlewares/axiosInterceptors";
 import config from "@/config/config";
 import Text from "@douyinfe/semi-ui/lib/es/typography/text";
@@ -35,7 +35,7 @@ export const ChatBox = ({
   const [isSending, setIsSending] = useState(false);
   const canAutoScrollRef = useRef(true);
   const [moreChatHistory, setMoreChatHistory] = useState<ChatMessage[]>([]);
-  const [pageNum, setPageNum] = useState(0);
+  const [pageNum, setPageNum] = useState(1);
   const totalPages = useRef(0);
   const [buttonContent, setButtonContent] = useState("发送");
   const isSendingRef = useRef(isSending); // 创建一个ref来跟踪isSending的值
@@ -68,7 +68,7 @@ export const ChatBox = ({
           if (res.data) {
             console.log(res);
             setMoreChatHistory(res.data);
-            setPageNum((prevState) => prevState + 1);
+            totalPages.current = res.totalPages;
           } else {
             setMoreChatHistory([]);
           }
@@ -87,25 +87,27 @@ export const ChatBox = ({
     };
   }, []);
 
-  function fetchData() {
+  async function fetchData() {
     canAutoScrollRef.current = false;
     let newData = [...moreChatHistory];
-    apiClient
-      .get(
-        `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=${pageNum}`,
-      )
-      .then((res: any) => {
-        if (res.data) {
-          newData = [...res.data, ...newData];
-          setTimeout(() => setMoreChatHistory(newData), 1500);
-          setPageNum((prevState) => prevState + 1);
-        } else {
-          setPageNum((prevState) => prevState + 1);
-        }
-      })
-      .catch((err) => {
-        Toast.error(err.message);
-      });
+    try {
+      await apiClient
+        .get(
+          `/api/conversation/${conversation_id}/get_message_list?pageSize=10&pageNum=${pageNum}`,
+        )
+        .then((result: any) => {
+          console.log(result);
+          if (result.data) {
+            newData = [...newData, ...result.data];
+            setMoreChatHistory(newData);
+            setPageNum((prevState) => prevState + 1);
+          } else {
+            setPageNum((prevState) => prevState + 1);
+          }
+        });
+    } catch (err: any) {
+      Toast.error(err.message);
+    }
   }
 
   const query = async (msg: string, conversation_id_new?: string) => {
