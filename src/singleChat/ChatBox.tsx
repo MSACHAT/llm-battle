@@ -163,7 +163,11 @@ export const ChatBox = ({
                   : packet;
                 const obj = JSON.parse(jsonString);
 
-                if (!obj.is_finish && isSendingRef.current) {
+                if (
+                  !obj.is_finish &&
+                  isSendingRef.current &&
+                  obj.event !== "done"
+                ) {
                   currentReply += obj.message.content;
                   setChatHistory((prevHistory) => {
                     const updatedHistory = [...prevHistory];
