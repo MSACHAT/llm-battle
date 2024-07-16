@@ -113,7 +113,11 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
                 </Dropdown.Menu>
               }
             >
-              <Avatar size={"small"} style={{ margin: 4 }}>
+              <Avatar
+                size={"small"}
+                style={{ margin: 4 }}
+                className={"user-avatar"}
+              >
                 {username?.substring(0, 1)}
               </Avatar>
               <span>{username}</span>
