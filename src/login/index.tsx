@@ -19,6 +19,7 @@ export const Login = ({ isRegister: isRegisterOrigin = false }) => {
         const res = await axios.post(config.apiUrl + "/user/login", data);
         if (res && res.data) {
           !isRegister && Toast.success("登录成功");
+          localStorage.setItem("username", data.username);
           localStorage.setItem("token", res.data);
           navigate("/battle");
           setLoginResult(true);

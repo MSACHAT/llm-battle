@@ -16,6 +16,7 @@ import { Chat } from "@/singleChat/LeftNavBar/LeftNavBar";
 import { navigate } from "@storybook/addon-links";
 
 type NavItemKey = "battle" | "leaderBoard" | "chat";
+
 interface NavBarProps {
   beShown: boolean;
 }
@@ -23,6 +24,7 @@ interface NavBarProps {
 export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const [lastConversationId, setLastConversationId] = useState("");
   const navigate = useNavigate();
+  const username = localStorage.getItem("username");
   useEffect(() => {
     if (localStorage.getItem("token")) {
       apiClient
@@ -43,6 +45,7 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
   const logout = () => {
     navigate("/login");
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
   };
   if (beShown === false) {
     return (
@@ -111,9 +114,9 @@ export const NavigationBar: React.FC<NavBarProps> = ({ beShown }) => {
               }
             >
               <Avatar size={"small"} style={{ margin: 4 }}>
-                U
+                {username?.substring(0, 1)}
               </Avatar>
-              <span>用户1</span>
+              <span>{username}</span>
             </Dropdown>
           </Space>
         }
