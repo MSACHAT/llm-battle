@@ -27,15 +27,14 @@
         .message-container {
           margin-bottom: 12px;
         }
-
-        .cursor {
-          display: inline-block;
-          width: 2px;
-          height: 1.5em;
-          background-color: var(--semi-color-primary);
-          vertical-align: bottom;
-          animation: blink 1s step-end infinite;
-        }
+        //.cursor {
+        //  display: block;
+        //  width: 2px;
+        //  height: 1.5em;
+        //  background-color: var(--semi-color-primary);
+        //  vertical-align: bottom;
+        //  animation: blink 1s step-end infinite;
+        //}
 
         .hidden {
           display: none;
